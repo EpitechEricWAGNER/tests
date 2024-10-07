@@ -17,7 +17,7 @@ config :todolist, Todolist.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "0.0.0.0",
-  database: "db",
+  database: "todolist",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
