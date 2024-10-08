@@ -3,15 +3,8 @@ defmodule TodolistWeb.WorkingTimeController do
 
   alias Todolist.WorkTime
   alias Todolist.WorkTime.WorkingTime
-  alias Todolist.Accounts
-  alias Todolist.Accounts.User
 
   action_fallback TodolistWeb.FallbackController
-
-  def index(conn, _params) do
-    workingtime = WorkTime.list_workingtime()
-    render(conn, :index, workingtime: workingtime)
-  end
 
   def create(conn, params) do
     user_id = Map.get(params, "userID")
@@ -20,6 +13,7 @@ defmodule TodolistWeb.WorkingTimeController do
     params = %{"user" => user_id}
     workingtime_params = Map.put(params, "start", start)
     workingtime_params = Map.put(workingtime_params, "end", ends)
+
     case WorkTime.create_working_time(workingtime_params) do
       {:ok, working_time} ->
         conn
@@ -39,6 +33,7 @@ defmodule TodolistWeb.WorkingTimeController do
         conn
         |> put_status(:not_found)
         |> json(%{error: "WorkingTime not found"})
+
       working_time ->
         render(conn, "show.json", working_time: working_time)
     end
@@ -73,8 +68,6 @@ defmodule TodolistWeb.WorkingTimeController do
         conn
         |> put_status(:ok)
         |> json(working_times)
-
     end
   end
-
 end

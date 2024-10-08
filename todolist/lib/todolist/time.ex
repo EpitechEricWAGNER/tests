@@ -35,7 +35,7 @@ defmodule Todolist.Time do
       ** (Ecto.NoResultsError)
 
   """
-  def get_cloak!(id), do: Repo.get!(Cloak, id)
+  def get_cloak!(user_id), do: Repo.all(from c in Cloak, where: c.user == ^user_id)
 
   @doc """
   Creates a cloak.

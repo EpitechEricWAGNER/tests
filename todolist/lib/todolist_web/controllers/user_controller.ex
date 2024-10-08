@@ -6,18 +6,6 @@ defmodule TodolistWeb.UserController do
 
   action_fallback TodolistWeb.FallbackController
 
-  def index(conn, %{"email" => email, "username" => username}) do
-    user = Accounts.get_user_by_email_and_username(email, username)
-
-    if user do
-      render(conn, "show.json", user: user)
-    else
-      conn
-      |> put_status(:not_found)
-      |> json(%{error: "User not found"})
-    end
-  end
-
   def create(conn, %{"user" => user_params}) do
     with {:ok, %User{} = user} <- Accounts.create_user(user_params) do
       conn
@@ -68,7 +56,7 @@ defmodule TodolistWeb.UserController do
       |> put_status(:not_found)
       |> json(%{error: "User not found"})
     else
-      render(conn, "index.json", users: users)
+      render(conn, :show, user: users)
     end
   end
 end

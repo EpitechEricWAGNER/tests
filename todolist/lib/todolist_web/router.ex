@@ -8,19 +8,15 @@ defmodule TodolistWeb.Router do
   scope "/api", TodolistWeb do
     pipe_through :api
 
-    resources "/users", UserController, except: [:edit, :new]
-    get "/users/:userID", UserController, :show
+    resources "/users", UserController, except: [:index, :edit, :new]
+    get "/users", UserController, :search
 
     resources "/workingtime", WorkingTimeController, except: [:show, :edit, :new]
     post "/workingtime/:userID", WorkingTimeController, :create
-
     get "/workingtime/:userID/:id", WorkingTimeController, :show
     get "/workingtime/:userID", WorkingTimeController, :show_with_params
 
-    resources "/clocks", CloakController, except: [:index, :create]
-
-    get "/users", UserController, :search
-
-    get "/workingtime/:userID/:id", WorkingTimeController, :show
+    post "/clocks/:userID", CloakController, :create
+    get "/clocks/:userID", CloakController, :show
   end
 end

@@ -18,6 +18,7 @@ defmodule Todolist.Accounts do
         where: ^query_conditions(email, username)
 
     Repo.all(query)
+    |> List.first()
   end
 
   defp query_conditions(nil, nil), do: false
