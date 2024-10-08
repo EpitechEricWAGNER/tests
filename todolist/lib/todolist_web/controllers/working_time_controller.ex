@@ -67,11 +67,9 @@ defmodule TodolistWeb.WorkingTimeController do
     ends = Map.get(params, "end")
 
     workingtime_params = %{"user" => user_id, "start" => starts, "end" => ends}
-    IO.puts("Params: #{inspect(workingtime_params)}")
 
     case WorkTime.list_workingtime(workingtime_params) do
       working_times ->
-        IO.puts("Working times: #{inspect(working_times)}")
         conn
         |> put_status(:ok)
         |> json(working_times)

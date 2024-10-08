@@ -14,5 +14,6 @@ defmodule Todolist.Accounts.User do
     user
     |> cast(attrs, [:username, :email])
     |> validate_required([:username, :email])
+    |> validate_format(:email, ~r/\A[\w\.-]+@[\w\.-]+\.\w+\z/, message: "must be a valid email")
   end
 end
