@@ -5,15 +5,16 @@ defmodule Todolist.WorkTime.WorkingTime do
   schema "workingtime" do
     field :end, :naive_datetime
     field :start, :naive_datetime
-    field :user, :id
+    belongs_to :user, Todolist.Accounts.User
 
     timestamps(type: :utc_datetime)
   end
 
   @doc false
-  def changeset(working_time, attrs) do
+  def changeset(working_time, attrs, user) do
     working_time
     |> cast(attrs, [:start, :end])
     |> validate_required([:start, :end])
+    |> put_assoc(:user, user)
   end
 end

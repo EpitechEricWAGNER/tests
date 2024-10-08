@@ -8,6 +8,12 @@ defmodule Todolist.Accounts do
 
   alias Todolist.Accounts.User
 
+
+  def get_user_by_email_and_username(email, username) do
+    from(u in User, where: ilike(u.email, ^email) and ilike(u.username, ^username))
+    |> Repo.one()
+  end
+
   @doc """
   Returns the list of users.
 

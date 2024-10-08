@@ -49,10 +49,14 @@ defmodule Todolist.WorkTime do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_working_time(attrs \\ %{}) do
+  def create_working_time(user, attrs \\ %{}) do
     %WorkingTime{}
-    |> WorkingTime.changeset(attrs)
+    |> WorkingTime.changeset(attrs, user)
     |> Repo.insert()
+  end
+
+  def get_workingtime_by_user(user_id, id) do
+    Repo.get_by(WorkingTime, user: user_id, id: id)
   end
 
   @doc """
