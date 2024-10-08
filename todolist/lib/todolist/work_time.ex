@@ -8,10 +8,6 @@ defmodule Todolist.WorkTime do
 
   alias Todolist.WorkTime.WorkingTime
 
-  def get_workingtime_by_user(user_id, id) do
-    Repo.get_by(WorkingTime, user: user_id, id: id)
-  end
-
   @doc """
   Returns the list of workingtime.
 
@@ -53,16 +49,11 @@ defmodule Todolist.WorkTime do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_working_time(user, attrs \\ %{}) do
+  def create_working_time(attrs \\ %{}) do
     %WorkingTime{}
-    |> WorkingTime.changeset(attrs, user)
+    |> WorkingTime.changeset(attrs)
     |> Repo.insert()
   end
-
-  def get_workingtime_by_user(user_id, id) do
-    Repo.get_by(WorkingTime, user: user_id, id: id)
-  end
-
   @doc """
   Updates a working_time.
 

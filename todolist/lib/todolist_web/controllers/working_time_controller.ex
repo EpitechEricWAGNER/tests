@@ -13,32 +13,36 @@ defmodule TodolistWeb.WorkingTimeController do
     render(conn, :index, workingtime: workingtime)
   end
 
-  def create(conn, %{"userID" => user_id, "working_time" => working_time}) do
-    user = Accounts.get_user!(user_id)
+  def create(conn, params) do
+    # Console outpu params
+    IO.puts("Params: #{inspect(params)}")
 
-    case WorkTime.create_working_time(user, working_time) do
-      {:ok, %WorkingTime{} = new_working_time} ->
+    user_id = Map.get(params, "userID")
+    start = Map.get(params, "start")
+    ends = Map.get(params, "end")
+    IO.puts("Params: #{inspect(user_id)}")
+    IO.puts("Params: #{inspect(start)}")
+    IO.puts("Params: #{inspect(ends)}")
+    params = %{"user" => user_id}
+    workingtime_params = Map.put(params, "start", start)
+    workingtime_params = Map.put(workingtime_params, "end", ends)
+    IO.puts("Params: #{inspect(workingtime_params)}")
+    case WorkTime.create_working_time(workingtime_params) do
+      {:ok, working_time} ->
         conn
         |> put_status(:created)
-        |> put_resp_header("location", ~p"/api/workingtime/#{new_working_time.id}")
-        |> render(:show, working_time: new_working_time)
+        |> render(:show, working_time: working_time)
 
       {:error, changeset} ->
         conn
         |> put_status(:unprocessable_entity)
-        |> render(TodolistWeb.ChangesetView, "error.json", changeset: changeset)
+        |> json(%{error: changeset})
     end
   end
 
-  def show(conn, %{"userID" => user_id, "id" => id}) do
-    case WorkTime.get_workingtime_by_user(user_id, id) do
-      nil ->
-        conn
-        |> put_status(:not_found)
-        |> json(%{error: "WorkingTime not found"})
-      working_time ->
-        render(conn, "show.json", working_time: working_time)
-    end
+  def show(conn, %{"id" => id}) do
+    working_time = WorkTime.get_working_time!(id)
+    render(conn, :show, working_time: working_time)
   end
 
   def update(conn, %{"id" => id, "working_time" => working_time_params}) do
