@@ -9,9 +9,6 @@ defmodule Todolist.WorkTime do
   alias Todolist.WorkTime.WorkingTime
 
   def get_workingtime_by_user(user_id, id) do
-
-    IO.puts("Params: #{user_id} -> #{id}")
-
     Repo.get_by(WorkingTime, user: user_id, id: id)
   end
 
@@ -24,9 +21,15 @@ defmodule Todolist.WorkTime do
       [%WorkingTime{}, ...]
 
   """
-  def list_workingtime do
-    Repo.all(WorkingTime)
+  def list_workingtime(workingtime_params) do
+
+    # Access the values using string keys since the map uses string keys
+    Repo.all(from w in WorkingTime,
+             where: w.start <= ^workingtime_params["end"] and
+                    w.end >= ^workingtime_params["start"] and
+                    w.user == ^workingtime_params["user"])
   end
+
 
   @doc """
   Gets a single working_time.

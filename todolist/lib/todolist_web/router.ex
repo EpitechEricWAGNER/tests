@@ -11,7 +11,7 @@ defmodule TodolistWeb.Router do
     resources "/users", UserController, except: [:edit, :new]
     get "/users/:userID", UserController, :show
 
-    resources "/workingtime", WorkingTimeController, except: [:edit, :new]
+    resources "/workingtime", WorkingTimeController, except: [:show, :edit, :new]
     post "/workingtime/:userID", WorkingTimeController, :create
 
     get "/workingtime/:userID/:id", WorkingTimeController, :show

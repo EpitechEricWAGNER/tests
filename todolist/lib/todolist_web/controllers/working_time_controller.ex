@@ -14,19 +14,12 @@ defmodule TodolistWeb.WorkingTimeController do
   end
 
   def create(conn, params) do
-    # Console outpu params
-    IO.puts("Params: #{inspect(params)}")
-
     user_id = Map.get(params, "userID")
     start = Map.get(params, "start")
     ends = Map.get(params, "end")
-    IO.puts("Params: #{inspect(user_id)}")
-    IO.puts("Params: #{inspect(start)}")
-    IO.puts("Params: #{inspect(ends)}")
     params = %{"user" => user_id}
     workingtime_params = Map.put(params, "start", start)
     workingtime_params = Map.put(workingtime_params, "end", ends)
-    IO.puts("Params: #{inspect(workingtime_params)}")
     case WorkTime.create_working_time(workingtime_params) do
       {:ok, working_time} ->
         conn
@@ -68,15 +61,22 @@ defmodule TodolistWeb.WorkingTimeController do
     end
   end
 
-  def show(conn, %{"userID" => user_id, "id" => id}) do
-    case WorkTime.get_workingtime_by_user(user_id, id) do
-      nil ->
-        conn
-        |> put_status(:not_found)
-        |> json(%{error: "WorkingTime not found"})
+  def show_with_params(conn, params) do
+    user_id = Map.get(params, "userID")
+    starts = Map.get(params, "start")
+    ends = Map.get(params, "end")
 
-      working_time ->
-        render(conn, "show.json", working_time: working_time)
+    workingtime_params = %{"user" => user_id, "start" => starts, "end" => ends}
+    IO.puts("Params: #{inspect(workingtime_params)}")
+
+    case WorkTime.list_workingtime(workingtime_params) do
+      working_times ->
+        IO.puts("Working times: #{inspect(working_times)}")
+        conn
+        |> put_status(:ok)
+        |> json(working_times)
+
     end
   end
+
 end
