@@ -8,6 +8,13 @@ defmodule Todolist.WorkTime do
 
   alias Todolist.WorkTime.WorkingTime
 
+  def get_workingtime_by_user(user_id, id) do
+
+    IO.puts("Params: #{user_id} -> #{id}")
+
+    Repo.get_by(WorkingTime, user: user_id, id: id)
+  end
+
   @doc """
   Returns the list of workingtime.
 

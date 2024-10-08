@@ -40,9 +40,15 @@ defmodule TodolistWeb.WorkingTimeController do
     end
   end
 
-  def show(conn, %{"id" => id}) do
-    working_time = WorkTime.get_working_time!(id)
-    render(conn, :show, working_time: working_time)
+  def show(conn, %{"userID" => user_id, "id" => id}) do
+    case WorkTime.get_workingtime_by_user(user_id, id) do
+      nil ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "WorkingTime not found"})
+      working_time ->
+        render(conn, "show.json", working_time: working_time)
+    end
   end
 
   def update(conn, %{"id" => id, "working_time" => working_time_params}) do

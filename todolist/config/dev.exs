@@ -2,25 +2,25 @@ import Config
 
 # POUR ERIC
 # Configure your database
-# config :todolist, Todolist.Repo,
-#   username: "postgres",
-#   password: "postgres",
-#   hostname: "localhost",
-#   database: "todolist",
-#   stacktrace: true,
-#   show_sensitive_data_on_connection_error: true,
-#   pool_size: 10
-
-# POUR LES CORENTIN
-# Configure your database
 config :todolist, Todolist.Repo,
   username: "postgres",
   password: "postgres",
-  hostname: "0.0.0.0",
+  hostname: "localhost",
   database: "todolist",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
+
+# POUR LES CORENTIN
+# Configure your database
+# config :todolist, Todolist.Repo,
+#   username: "postgres",
+#   password: "postgres",
+#   hostname: "0.0.0.0",
+#   database: "todolist",
+#   stacktrace: true,
+#   show_sensitive_data_on_connection_error: true,
+#   pool_size: 10
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
