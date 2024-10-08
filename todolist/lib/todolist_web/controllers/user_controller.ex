@@ -40,4 +40,28 @@ defmodule TodolistWeb.UserController do
       send_resp(conn, :no_content, "")
     end
   end
+
+  def search(conn, params) do
+    email =
+      case Map.get(params, "email") do
+        "" -> nil
+        value -> value
+      end
+
+    username =
+      case Map.get(params, "username") do
+        "" -> nil
+        value -> value
+      end
+
+    users = Accounts.get_user_by_params(email, username)
+
+    if length(users) == 0 do
+      conn
+      |> put_status(:not_found)
+      |> json(%{error: "User not found"})
+    else
+      render(conn, "index.json", users: users)
+    end
+  end
 end

@@ -13,6 +13,9 @@ defmodule TodolistWeb.Router do
     resources "/workingtime", WorkingTimeController, except: [:edit, :new]
 
     resources "/clocks", CloakController, except: [:index, :create]
-  end
 
+    get "/users", UserController, :search
+
+    get "/workingtime/:userID/:id", WorkingTimeController, :show
+  end
 end

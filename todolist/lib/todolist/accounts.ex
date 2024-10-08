@@ -8,6 +8,25 @@ defmodule Todolist.Accounts do
 
   alias Todolist.Accounts.User
 
+  def get_user_by_params(nil, nil) do
+    []
+  end
+
+  def get_user_by_params(email, username) do
+    query =
+      from i in User,
+        where: ^query_conditions(email, username)
+
+    Repo.all(query)
+  end
+
+  defp query_conditions(nil, nil), do: false
+  defp query_conditions(email, nil), do: dynamic([i], i.email == ^email)
+  defp query_conditions(nil, username), do: dynamic([i], i.username == ^username)
+
+  defp query_conditions(email, username),
+    do: dynamic([i], i.email == ^email and i.username == ^username)
+
   @doc """
   Returns the list of users.
 
