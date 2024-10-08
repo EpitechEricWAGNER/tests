@@ -39,11 +39,11 @@ defmodule TodolistWeb.WorkingTimeController do
     end
   end
 
-  def update(conn, %{"id" => id, "working_time" => working_time_params}) do
+  def update(conn, %{"id" => id} = params) do
     working_time = WorkTime.get_working_time!(id)
 
     with {:ok, %WorkingTime{} = working_time} <-
-           WorkTime.update_working_time(working_time, working_time_params) do
+           WorkTime.update_working_time(working_time, params) do
       render(conn, :show, working_time: working_time)
     end
   end

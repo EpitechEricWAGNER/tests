@@ -22,14 +22,15 @@ defmodule Todolist.WorkTime do
 
   """
   def list_workingtime(workingtime_params) do
-
     # Access the values using string keys since the map uses string keys
-    Repo.all(from w in WorkingTime,
-             where: w.start <= ^workingtime_params["end"] and
-                    w.end >= ^workingtime_params["start"] and
-                    w.user == ^workingtime_params["user"])
+    Repo.all(
+      from w in WorkingTime,
+        where:
+          w.start <= ^workingtime_params["end"] and
+            w.end >= ^workingtime_params["start"] and
+            w.user == ^workingtime_params["user"]
+    )
   end
-
 
   @doc """
   Gets a single working_time.
@@ -64,6 +65,7 @@ defmodule Todolist.WorkTime do
     |> WorkingTime.changeset(attrs)
     |> Repo.insert()
   end
+
   @doc """
   Updates a working_time.
 

@@ -1,6 +1,5 @@
 defmodule TodolistWeb.CloakController do
   use TodolistWeb, :controller
-  require Logger
   alias Todolist.Time
   alias Todolist.Time.Cloak
 
@@ -20,8 +19,6 @@ defmodule TodolistWeb.CloakController do
       "time" => time,
       "status" => status
     }
-
-    Logger.debug(cloak_params)
 
     case Time.create_cloak(cloak_params) do
       {:ok, cloak} ->
