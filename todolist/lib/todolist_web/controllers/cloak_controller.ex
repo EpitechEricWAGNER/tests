@@ -1,6 +1,6 @@
 defmodule TodolistWeb.CloakController do
   use TodolistWeb, :controller
-
+  require Logger
   alias Todolist.Time
   alias Todolist.Time.Cloak
 
@@ -11,19 +11,23 @@ defmodule TodolistWeb.CloakController do
     render(conn, :index, clocks: clocks)
   end
 
-  def create(conn, params) do
-    user_id = Map.get(params, "userID")
+  def create(conn, %{"userID" => user_id}) do
     time = DateTime.utc_now()
     status = true
-    list_params = %{"user" => user_id}
-    cloak_params = Map.put(list_params, "time", time)
-    cloak_params = Map.put(cloak_params, "status", status)
+
+    cloak_params = %{
+      "user" => user_id,
+      "time" => time,
+      "status" => status
+    }
+
+    Logger.debug(cloak_params)
 
     case Time.create_cloak(cloak_params) do
-      {:ok, clock} ->
+      {:ok, cloak} ->
         conn
         |> put_status(:created)
-        |> render(:show, cloak: clock)
+        |> render(:show, cloak: cloak)
 
       {:error, changeset} ->
         conn

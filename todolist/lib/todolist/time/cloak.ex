@@ -13,7 +13,7 @@ defmodule Todolist.Time.Cloak do
   @doc false
   def changeset(cloak, attrs) do
     cloak
-    |> cast(attrs, [:time, :status])
-    |> validate_required([:time, :status])
+    |> cast(attrs, [:time, :status, :user])
+    |> validate_required([:time, :status, :user])
   end
 end
