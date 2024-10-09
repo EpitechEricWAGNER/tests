@@ -4,6 +4,7 @@ import Config
 config :todolist, Todolist.Repo,
   username: "postgres",
   password: "postgres",
+  # hostname: "localhost",
   hostname: "0.0.0.0",
   database: "todolist",
   stacktrace: true,
