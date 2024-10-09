@@ -51,7 +51,7 @@ defmodule TodolistWeb.UserController do
 
     users = Accounts.get_user_by_params(email, username)
 
-    if length(users) == 0 do
+    if users == nil do
       conn
       |> put_status(:not_found)
       |> json(%{error: "User not found"})

@@ -32,6 +32,8 @@ defmodule TodolistWeb.Endpoint do
     plug Phoenix.Ecto.CheckRepoStatus, otp_app: :todolist
   end
 
+  plug CORSPlug, origin: ["http://localhost:5173"]
+
   plug Phoenix.LiveDashboard.RequestLogger,
     param_key: "request_logger",
     cookie_key: "request_logger"
