@@ -5,7 +5,7 @@ config :todolist, Todolist.Repo,
   username: System.get_env("POSTGRES_USER") || "postgres",
   password: System.get_env("POSTGRES_PASSWORD") || "postgres",
   # Dev environment setup
-  # hostname: System.get_env("POSTGRES_HOST") || "0.0.0.0",
+  # hostname: System.get_env("POSTGRES_HOST") || "localhost",
   hostname: System.get_env("POSTGRES_HOST") || "postgres",
   database: System.get_env("POSTGRES_DB") || "time_manager_db",
   stacktrace: true,
