@@ -1,0 +1,20 @@
+FROM elixir:1.17
+
+ARG OS
+ARG ENV
+
+ENV OS=${OS}
+ENV ENV=${ENV}
+
+RUN mix local.hex --force && mix local.rebar --force
+
+WORKDIR /app
+
+COPY mix.exs mix.lock ./
+RUN mix deps.get
+
+COPY . .
+
+RUN mix compile
+
+CMD ["mix", "phx.server"]
