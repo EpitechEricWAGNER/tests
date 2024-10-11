@@ -27,7 +27,9 @@ services:
   vue:
     image: frontend
     container_name: time_manager_frontend
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
     restart: always
     ports:
       - 5173:8080
