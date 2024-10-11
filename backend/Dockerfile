@@ -1,20 +1,27 @@
-FROM elixir:1.17
+FROM elixir:latest
 
 ARG OS
 ARG ENV
+ARG POSTGRES_USER
+ARG POSTGRES_PASSWORD
+ARG POSTGRES_DB
+ARG POSTGRES_HOST
 
 ENV OS=${OS}
 ENV ENV=${ENV}
+ENV POSTGRES_USER=${POSTGRES_USER}
+ENV POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+ENV POSTGRES_DB=${POSTGRES_DB}
+ENV POSTGRES_HOST=${POSTGRES_HOST}
 
 RUN mix local.hex --force && mix local.rebar --force
 
-WORKDIR /app
+WORKDIR /app/backend
 
-COPY mix.exs mix.lock ./
+COPY mix.exs .
+
 RUN mix deps.get
 
-COPY . .
+RUN mix deps.compile
 
-RUN mix compile
-
-CMD ["mix", "phx.server"]
+CMD mix setup && mix phx.server

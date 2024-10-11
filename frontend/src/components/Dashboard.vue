@@ -4,7 +4,6 @@ import DateRangePicker from './DateRangePicker.vue'
 import MainNav from './MainNav.vue'
 import RecentSales from './RecentSales.vue'
 import Search from './Search.vue'
-import TeamSwitcher from './TeamSwitcher.vue'
 import UserNav from './UserNav.vue'
 
 import { Button } from '@/components/ui/button'
@@ -34,7 +33,6 @@ import {
   <div class="hidden flex-col md:flex">
     <div class="border-b">
       <div class="flex h-16 items-center px-4">
-        <TeamSwitcher />
         <MainNav class="mx-6" />
         <div class="ml-auto flex items-center space-x-4">
           <Search />
