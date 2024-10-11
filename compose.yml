@@ -33,8 +33,6 @@ services:
       - 5173:8080
     depends_on:
       - postgres
-    volumes:
-      - ./frontend:/app
     networks:
       - front-end
       - back-end

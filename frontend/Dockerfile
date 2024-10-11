@@ -1,6 +1,5 @@
 FROM node:lts-alpine
 
-# install simple http server for serving static content
 RUN npm install -g http-server
 
 WORKDIR /app
@@ -11,5 +10,6 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 8080
-CMD npm run build && http-server dist
+RUN npm run build
+
+CMD http-server dist
