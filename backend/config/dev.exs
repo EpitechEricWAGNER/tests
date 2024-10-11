@@ -4,9 +4,19 @@ import Config
 config :todolist, Todolist.Repo,
   username: System.get_env("POSTGRES_USER") || "postgres",
   password: System.get_env("POSTGRES_PASSWORD") || "postgres",
-  # Dev environment setup
-  # hostname: System.get_env("POSTGRES_HOST") || "localhost",
-  hostname: System.get_env("POSTGRES_HOST") || "postgres",
+  hostname:
+    (fn ->
+       cond do
+         System.get_env("ENV") == "prod" ->
+           System.get_env("POSTGRES_HOST") || "postgres"
+
+         System.get_env("ENV") == "dev" && System.get_env("OS") == "windows" ->
+           "localhost"
+
+         System.get_env("ENV") == "dev" && System.get_env("OS") == "linux" ->
+           "0.0.0.0"
+       end
+     end).(),
   database: System.get_env("POSTGRES_DB") || "time_manager_db",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
@@ -21,9 +31,16 @@ config :todolist, Todolist.Repo,
 config :todolist, TodolistWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
-  http: [ip: {0, 0, 0, 0}, port: 4000],
-  # Dev environment setup
-  # http: [ip: {127, 0, 0, 1}, port: 4000],
+  http:
+    (fn ->
+       cond do
+         System.get_env("ENV") == "prod" ->
+           [ip: {0, 0, 0, 0}, port: 4000]
+
+         System.get_env("ENV") == "dev" ->
+           [ip: {127, 0, 0, 1}, port: 4000]
+       end
+     end).(),
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
