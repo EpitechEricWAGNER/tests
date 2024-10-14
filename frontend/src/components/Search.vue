@@ -9,9 +9,14 @@ const store = useStore();
 const searchUser = async () => {
     try {
         const userData = {
-            username: searchQuery.value,
+            username: "",
             email: "",
         };
+        if (searchQuery.value.includes("@")) {
+            userData.email = searchQuery.value;
+        } else {
+            userData.username = searchQuery.value;
+        }
         const user: User = await userService.getUser(userData);
         console.log("Utilisateur trouvé :", user);
         store.commit("setUser", user);
