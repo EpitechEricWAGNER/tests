@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import { computed, h, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
-import { useForm } from 'vee-validate'
-import { toTypedSchema } from '@vee-validate/zod'
-import * as z from 'zod'
 import { Input } from '@/components/ui/input'
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Separator } from '@/components/ui/separator'
@@ -11,44 +8,12 @@ import {
   Select,
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
-import { toast } from '@/components/ui/toast'
-import { User } from '@/store';
-import userService from '@/services/userService';
-
-const profileFormSchema = toTypedSchema(z.object({
-  username: z
-    .string()
-    .min(2, {
-      message: 'Username must be at least 2 characters.',
-    })
-    .max(30, {
-      message: 'Username must not be longer than 30 characters.',
-    }),
-  email: z
-    .string({
-      required_error: 'Please select an email to display.',
-    })
-    .email(),
-}))
 
 const store = useStore();
 const user = computed(() => store.getters.user);
 
 const username = ref<string>('');
 const email = ref<string>('');
-
-const updateUser = async () => {
-  try {
-    const userData = {
-      username: username.value,
-      email: email.value
-    };
-    const user: User = await userService.updateUser(userData);
-    store.commit('setUser', user);
-  } catch (error) {
-    console.error('Erreur lors de la recherche utilisateur:', error);
-  }
-};
 
 </script>
 
