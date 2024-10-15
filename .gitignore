@@ -1,2 +1,5 @@
 db-data
 .env
+.terraform/
+*.tfstate
+*.tfstate.backup

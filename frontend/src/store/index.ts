@@ -1,4 +1,5 @@
 import { createStore } from 'vuex';
+import createPersistedState from 'vuex-persistedstate';
 
 export interface User {
 	id: string;
@@ -11,6 +12,7 @@ interface State {
 }
 
 const store = createStore<State>({
+	plugins: [createPersistedState()],
 	state: {
 		user: null,
 	},

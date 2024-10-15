@@ -7,6 +7,22 @@ import { User } from "@/store";
 const searchQuery = ref<string>("");
 const store = useStore();
 const searchUser = async () => {
+  try {
+    const userData = {
+      username: '',
+      email: ''
+    };
+    if (searchQuery.value.includes('@')) {
+      userData.email = searchQuery.value;
+    } else {
+      userData.username = searchQuery.value;
+    }
+    const user: User = await userService.getUser(userData);
+    console.log('Utilisateur trouvé :', user);
+    store.commit('setUser', user);
+  } catch (error) {
+    console.error('Erreur lors de la recherche utilisateur:', error);
+  }
     try {
         const userData = {
             username: "",

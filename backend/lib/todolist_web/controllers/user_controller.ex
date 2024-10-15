@@ -6,6 +6,11 @@ defmodule TodolistWeb.UserController do
 
   action_fallback TodolistWeb.FallbackController
 
+  def getAll(conn, _params) do
+    users = Accounts.list_users()
+    render(conn, :index, users: users)
+  end
+
   def create(conn, %{"user" => user_params}) do
     with {:ok, %User{} = user} <- Accounts.create_user(user_params) do
       conn
