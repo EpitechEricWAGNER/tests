@@ -10,28 +10,28 @@ defmodule TodolistWeb.CloakController do
     render(conn, :index, clocks: clocks)
   end
 
-  def create(conn, %{"userID" => user_id}) do
-    time = DateTime.utc_now()
-    status = true
+def create(conn, %{"userID" => user_id} = params) do
+  time = DateTime.utc_now()
+  status = Map.get(params, "status")
 
-    cloak_params = %{
-      "user" => user_id,
-      "time" => time,
-      "status" => status
-    }
+  cloak_params = %{
+    "user" => user_id,
+    "time" => time,
+    "status" => status
+  }
 
-    case Time.create_cloak(cloak_params) do
-      {:ok, cloak} ->
-        conn
-        |> put_status(:created)
-        |> render(:show, cloak: cloak)
+  case Time.create_cloak(cloak_params) do
+    {:ok, cloak} ->
+      conn
+      |> put_status(:created)
+      |> render(:show, cloak: cloak)
 
-      {:error, changeset} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> json(%{errors: changeset})
-    end
+    {:error, changeset} ->
+      conn
+      |> put_status(:unprocessable_entity)
+      |> json(%{errors: changeset})
   end
+end
 
   def show(conn, %{"userID" => user_id}) do
     cloak = Time.get_cloak!(user_id)
