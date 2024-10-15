@@ -24,10 +24,7 @@ config :todolist, TodolistWeb.Endpoint,
   code_reloader: true,
   debug_errors: true,
   secret_key_base: "rZCc/S4fKmqnNQMnfPvLXQIhUHtoClFQ534Wz+cS5BrrqlXBrJRyNXugerY3K/C5",
-  watchers: [
-    esbuild: {Esbuild, :install_and_run, [:todolist, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:todolist, ~w(--watch)]}
-  ]
+  watchers: []
 
 # ## SSL Support
 #
