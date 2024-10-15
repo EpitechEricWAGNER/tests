@@ -1,31 +1,33 @@
 <script setup lang="ts">
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+import { RouterLink } from "vue-router";
 
 interface Item {
-  title: string
-  href: string
+    title: string;
+    href: string;
 }
 
 const sidebarNavItems: Item[] = [
-  {
-    title: 'Create',
-    href: '/',
-  },
-  {
-    title: 'Profile',
-    href: '/',
-  },
-]
+    {
+        title: "Create",
+        href: "/profile/create",
+    },
+    {
+        title: "Profile",
+        href: "/profile",
+    },
+];
 </script>
 
 <template>
-  <nav class="flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1">
-    <Button v-for="item in sidebarNavItems" :key="item.title" as="a" :href="item.href" variant="ghost" :class="cn(
-      'w-full text-left justify-start',
-      $route.path === `${item.href}.html` && 'bg-muted hover:bg-muted',
-    )">
-      {{ item.title }}
-    </Button>
-  </nav>
+    <nav class="flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1">
+        <RouterLink
+            v-for="item in sidebarNavItems"
+            :key="item.title"
+            :to="item.href"
+            class="w-full text-left justify-start"
+            active-class="bg-muted hover:bg-muted"
+        >
+            {{ item.title }}
+        </RouterLink>
+    </nav>
 </template>

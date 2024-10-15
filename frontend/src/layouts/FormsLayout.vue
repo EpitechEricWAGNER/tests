@@ -20,7 +20,7 @@ import { Separator } from '@/components/ui/separator'
       </aside>
       <div class="flex-1 lg:max-w-2xl">
         <div class="space-y-6">
-          <slot />
+          <router-view />
         </div>
       </div>
     </div>
