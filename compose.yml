@@ -27,6 +27,8 @@ services:
   vue:
     image: corentinjs/t-poo-700-stg2-frontend:latest
     container_name: time_manager_frontend
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: always
     ports:
       - 5173:8080
@@ -38,25 +40,30 @@ services:
 
   phoenix:
     image: corentinjs/t-poo-700-stg2-api:latest
+    container_name: time_manager_phoenix
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_DB=${POSTGRES_DB}
-    container_name: time_manager_phoenix
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: always
     ports:
       - 4000:4000
     depends_on:
       - postgres
-    volumes:
-      - ./backend/assets/:/app/backend/assets
-      - ./backend/config/:/app/backend/config
-      - ./backend/priv/:/app/backend/priv:cached
-      - ./backend/lib/:/app/backend/lib:cached
-      - ./backend/test/:/app/backend/test
     networks:
       - back-end
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: time_manager_watchtower
+    restart: unless-stop
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    argument: --label-enable
+    command: --interval 30
 
 networks:
   front-end:
