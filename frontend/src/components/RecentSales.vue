@@ -29,7 +29,6 @@ watch(user, (newUser: any) => {
   email.value = newUser.data.email;
 })
 
-// récupérer les données du composant DateRangePicker
 const dateRange = computed(() => store.getters.dateRange);
 
 const startDateRange = ref<string>("");
@@ -40,24 +39,75 @@ watch(dateRange, (newDate: any) => {
   startDateRange.value = newDate.startDateRange + " 00:00:00";
   endDateRange.value = newDate.endDateRange + " 23:59:59";
 })
-
 const workingTimes = ref([]);
+
+const calculateDuration = (start: Date, end: Date) => {
+  const startTime = new Date(start);
+  const endTime = new Date(end);
+  return (endTime.getHours() - startTime.getHours()) * 60 +
+         (endTime.getMinutes() - startTime.getMinutes());
+};
+
+const workingTimesRange = computed(() => {
+  const timesMap: Record<string, any> = {};
+
+  workingTimes.value.forEach((work: any) => {
+    const startingDate = new Date(work.start).toLocaleString('default', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  
+
+    const endingDate = new Date(work.end).toLocaleString('default', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
+
+    const duration = calculateDuration(new Date(work.start), new Date(work.end));
+
+    const key = `${startingDate}-${endingDate}`;
+
+    if (timesMap[key]) {
+      timesMap[key].duration += duration;
+    } else {
+      timesMap[key] = {
+        startingDate,
+        endingDate,
+        duration,
+      };
+    }
+  });
+
+  return Object.values(timesMap);
+});
+
+const totalDuration = computed(() => {
+  let totalMinutes = 0;
+  workingTimesRange.value.forEach((work: any) => {
+    totalMinutes += work.duration;
+  });
+  return totalMinutes;
+});
+
+const totalHours = computed(() => Math.floor(totalDuration.value / 60));
+const totalMinutes = computed(() => totalDuration.value % 60);
+
+
 const getWorkingTimes = async () => {
-  console.log(userId, startDateRange, endDateRange)
   if (!userId.value || !startDateRange.value || !endDateRange.value) {
     console.error("Missing required parameters for request");
     return;
   }
   try {
     const response = await workingtimeService.getAllWorkingTimes(userId.value, startDateRange.value, endDateRange.value);
-    workingTimes.value = response;
-    console.log(workingTimes.value);
+    workingTimes.value = response.data;
   } catch (error) {
     console.error("Error fetching working times:", error);
   }
 };
 
-// if user != null && dateRange.value
 watch(
   () => [user.value, dateRange.value],
   () => {
@@ -73,94 +123,30 @@ watch(
   <CardHeader>
     <CardTitle>Working Times</CardTitle>
     <CardDescription>
-      You made 265 sales this month.
+      For the selected period, you have to work {{ totalHours }} hours and {{ totalMinutes }} minutes.
     </CardDescription>
   </CardHeader>
   <CardContent>
-    <div class="space-y-8">
-      <div class="flex items-center">
-        <Avatar class="h-9 w-9">
-          <AvatarImage src="/avatars/01.png" alt="Avatar" />
-          <AvatarFallback>OM</AvatarFallback>
-        </Avatar>
-        <div class="ml-4 space-y-1">
-          <p class="text-sm font-medium leading-none">
-            Olivia Martin
-          </p>
-          <p class="text-sm text-muted-foreground">
-            olivia.martin@email.com
-          </p>
-        </div>
-        <div class="ml-auto font-medium">
-          +$1,999.00
-        </div>
+    <div>
+      <div v-if="workingTimesRange.length === 0" class="text-center text-sm text-muted-foreground">
+        No data found.
       </div>
-      <div class="flex items-center">
-        <Avatar class="flex h-9 w-9 items-center justify-center space-y-0 border">
-          <AvatarImage src="/avatars/02.png" alt="Avatar" />
-          <AvatarFallback>JL</AvatarFallback>
-        </Avatar>
-        <div class="ml-4 space-y-1">
-          <p class="text-sm font-medium leading-none">
-            Jackson Lee
-          </p>
-          <p class="text-sm text-muted-foreground">
-            jackson.lee@email.com
-          </p>
-        </div>
-        <div class="ml-auto font-medium">
-          +$39.00
-        </div>
-      </div>
-      <div class="flex items-center">
-        <Avatar class="h-9 w-9">
-          <AvatarImage src="/avatars/03.png" alt="Avatar" />
-          <AvatarFallback>IN</AvatarFallback>
-        </Avatar>
-        <div class="ml-4 space-y-1">
-          <p class="text-sm font-medium leading-none">
-            Isabella Nguyen
-          </p>
-          <p class="text-sm text-muted-foreground">
-            isabella.nguyen@email.com
-          </p>
-        </div>
-        <div class="ml-auto font-medium">
-          +$299.00
-        </div>
-      </div>
-      <div class="flex items-center">
-        <Avatar class="h-9 w-9">
-          <AvatarImage src="/avatars/04.png" alt="Avatar" />
-          <AvatarFallback>WK</AvatarFallback>
-        </Avatar>
-        <div class="ml-4 space-y-1">
-          <p class="text-sm font-medium leading-none">
-            William Kim
-          </p>
-          <p class="text-sm text-muted-foreground">
-            will@email.com
-          </p>
-        </div>
-        <div class="ml-auto font-medium">
-          +$99.00
-        </div>
-      </div>
-      <div class="flex items-center">
-        <Avatar class="h-9 w-9">
-          <AvatarImage src="/avatars/05.png" alt="Avatar" />
-          <AvatarFallback>SD</AvatarFallback>
-        </Avatar>
-        <div class="ml-4 space-y-1">
-          <p class="text-sm font-medium leading-none">
-            Sofia Davis
-          </p>
-          <p class="text-sm text-muted-foreground">
-            sofia.davis@email.com
-          </p>
-        </div>
-        <div class="ml-auto font-medium">
-          +$39.00
+      <div class="space-y-8" v-else>
+        <div class="flex items-center" v-for="work in workingTimesRange" :key="work.startingDate">
+          <Avatar class="h-9 w-9">
+            <AvatarImage src="/avatars/01.png" alt="Avatar" />
+            <AvatarFallback>OM</AvatarFallback>
+          </Avatar>
+          <div class="ml-4 space-y-1">
+            <p class="text-sm font-medium leading-none">
+              Date : {{ work.startingDate }}
+            </p>
+            <p class="text-sm text-muted-foreground">
+            </p>
+          </div>
+          <div class="ml-auto font-medium">
+            {{ Math.floor(work.duration / 60) }} hours {{ work.duration % 60 }} minutes
+          </div>
         </div>
       </div>
     </div>

@@ -13,15 +13,16 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 
-const df = new DateFormatter('en-US', {
+const df = new DateFormatter('fr-FR', {
   dateStyle: 'medium',
 })
 
-const calendarDate = new CalendarDate(2023, 0, 20)
+const today = new Date()
+const calendarDate = new CalendarDate(today.getFullYear(), today.getMonth()+1, today.getDate())
 
 const value = ref({
   start: calendarDate,
-  end: calendarDate.add({ days: 20 }),
+  end: calendarDate,
 }) as Ref<DateRange>
 
 const emit = defineEmits(['date-change'])
@@ -29,9 +30,11 @@ const emit = defineEmits(['date-change'])
 watch(value, (newValue) => {
   // si on clique une fois alors on ne fais rien
   if (!newValue.start &&!newValue.end) return
+  const formatValue = (val) => val.toString().padStart(2, '0');
+
   emit('date-change', {
-    startDateRange: newValue.start.toDate(getLocalTimeZone()).toISOString().split('T')[0],
-    endDateRange: newValue.end.toDate(getLocalTimeZone()).toISOString().split('T')[0]
+    startDateRange: newValue.start.year + "-" + formatValue(newValue.start.month) + "-" + formatValue(newValue.start.day),
+    endDateRange: newValue.end.year + "-" + formatValue(newValue.end.month) + "-" + formatValue(newValue.end.day),
   });
 })
 
