@@ -13,30 +13,43 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import clockService from "@/services/clockService";
 import { useStore } from "vuex";
 
 const store = useStore();
 const user = computed(() => store.getters.user);
 
-const getClocks = async () => {
+const getClock = async () => {
     try {
         const id = user.value.data.id;
-        const clocks = await clockService.refresh(id);
+        const clocks: { status: boolean; time: Date; user: Number }[] =
+            await clockService.getClocks(id);
+        // console.log("Horloges récupérées:", clocks);
+        const result = clocks;
+        // console.log("Horloge récupérée:", result);
+        return result;
     } catch (error) {
-        console.error("Erreur lors de la recherche utilisateur:", error);
+        console.error("Erreur lors de la récupération de l'horloge:", error);
+        return null;
     }
 };
 
 const createClock = async () => {
+    const status = await getClock();
+    console.log("Status:", status);
     try {
         const id = user.value.data.id;
         const clock = await clockService.clock(id);
+        console.log("Horloge créée:", clock);
     } catch (error) {
         console.error("Erreur lors de la création de l'horloge:", error);
     }
 };
+
+onMounted(() => {
+    getClock();
+});
 </script>
 
 <template>
