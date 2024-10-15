@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import FormsLayout from '@/layouts/FormsLayout.vue'
+import FormsManageLayout from '@/layouts/FormsManageLayout.vue'
 import WorkingTimeForm from '@/components/WorkingTimeForm.vue'
 </script>
 
 <template>
-  <FormsLayout>
+  <FormsManageLayout>
     <WorkingTimeForm />
-  </FormsLayout>
+  </FormsManageLayout>
 </template>

@@ -4,7 +4,8 @@ import MainNav from "@/components/MainNav.vue";
 import DateRangePicker from "@/components/DateRangePicker.vue";
 import RecentSales from "@/components/RecentSales.vue";
 import Search from "@/components/Search.vue";
-import UserNav from "@/components/UserNav.vue";import { useStore } from 'vuex';
+import UserNav from "@/components/UserNav.vue";
+import { useStore } from 'vuex';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +17,6 @@ import {
 } from "@/components/ui/card";
 import { computed, onMounted } from "vue";
 import clockService from "@/services/clockService";
-import { useStore } from "vuex";
 
 const store = useStore();
 const user = computed(() => store.getters.user);

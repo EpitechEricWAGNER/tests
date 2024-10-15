@@ -9,7 +9,7 @@ const routes = [
     { path: "/", component: Dashboard },
 	{
         path: "/profile",
-        component: Manage,
+        component: ManageProfile,
         children: [
             {
                 path: "create",
