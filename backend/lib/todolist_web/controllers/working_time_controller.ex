@@ -65,9 +65,7 @@ defmodule TodolistWeb.WorkingTimeController do
 
     case WorkTime.list_workingtime(workingtime_params) do
       working_times ->
-        conn
-        |> put_status(:ok)
-        |> json(working_times)
+        render(conn, :index, workingtime: working_times)
     end
   end
 end
