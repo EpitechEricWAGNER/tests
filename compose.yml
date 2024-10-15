@@ -59,11 +59,12 @@ services:
   watchtower:
     image: containrrr/watchtower
     container_name: time_manager_watchtower
-    restart: unless-stop
+    restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    argument: --label-enable
-    command: --interval 30
+    environment:
+      WATCHTOWER_POLL_INTERVAL: 30
+      WATCHTOWER_LABEL_ENABLE: 1
 
 networks:
   front-end:
