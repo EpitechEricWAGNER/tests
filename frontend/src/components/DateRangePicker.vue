@@ -3,7 +3,7 @@ import { Calendar as CalendarIcon } from 'lucide-vue-next'
 import type { DateRange } from 'radix-vue'
 import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
 
-import { type Ref, ref } from 'vue'
+import { type Ref, ref, watch } from 'vue'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { RangeCalendar } from '@/components/ui/range-calendar'
@@ -23,6 +23,18 @@ const value = ref({
   start: calendarDate,
   end: calendarDate.add({ days: 20 }),
 }) as Ref<DateRange>
+
+const emit = defineEmits(['date-change'])
+
+watch(value, (newValue) => {
+  // si on clique une fois alors on ne fais rien
+  if (!newValue.start &&!newValue.end) return
+  emit('date-change', {
+    startDateRange: newValue.start.toDate(getLocalTimeZone()).toISOString().split('T')[0],
+    endDateRange: newValue.end.toDate(getLocalTimeZone()).toISOString().split('T')[0]
+  });
+})
+
 </script>
 
 <template>
@@ -52,7 +64,7 @@ const value = ref({
       </PopoverTrigger>
       <PopoverContent class="w-auto p-0" align="end">
         <RangeCalendar v-model="value" weekday-format="short" :number-of-months="2" initial-focus
-          :placeholder="value.start" @update:start-value="(startDate) => value.start = startDate" />
+          :placeholder="value.start" @update:start-value="(startDate) => value.start = startDate " />
       </PopoverContent>
     </Popover>
   </div>

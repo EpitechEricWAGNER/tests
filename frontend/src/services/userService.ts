@@ -72,5 +72,16 @@ export default {
 			console.error('Error deleting user:', error.response ? error.response.data : error.message);
 			throw error;
 		}
+	},
+
+	async getAllUsers(): Promise<UserResponse[]> {
+		try {
+            const response: AxiosResponse<UserResponse[]> = await axios.get(`${API_URL}/allusers`);
+            return response.data.data;
+        } catch (error: any) {
+            console.error('Error getting all users:', error.response? error.response.data : error.message);
+            throw error;
+        }
 	}
+    
 };

@@ -49,7 +49,12 @@ watch(user, (newUser: any) => {
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
         <DropdownMenuItem>
-          <router-link to="/manage">Profile</router-link>
+          <router-link to="/profile">Profile</router-link>
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
+      <DropdownMenuGroup>
+        <DropdownMenuItem>
+          <router-link to="/manage">Manage</router-link>
         </DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />

@@ -5,6 +5,7 @@ import DateRangePicker from '@/components/DateRangePicker.vue'
 import RecentSales from '@/components/RecentSales.vue'
 import Search from '@/components/Search.vue'
 import UserNav from '@/components/UserNav.vue'
+import { useStore } from 'vuex';
 
 import { Button } from '@/components/ui/button'
 import {
@@ -14,6 +15,22 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+
+import { ref } from 'vue'
+const selectedDates = ref({
+  startDateRange: null,
+  endDateRange: null
+})
+
+const store = useStore();
+
+function handleDateChange(dates: { startDateRange: Date, endDateRange: Date }) {
+  selectedDates.value = dates
+  
+  store.commit('setDateRange', selectedDates);
+  console.log('Date range changed:', dates)
+}
+
 </script>
 
 <template>
@@ -33,7 +50,7 @@ import {
           Dashboard
         </h2>
         <div class="flex items-center space-x-2">
-          <DateRangePicker />
+          <DateRangePicker  @date-change="handleDateChange" />
           <Button>Clock</Button>
         </div>
       </div>
@@ -128,15 +145,7 @@ import {
           </CardContent>
         </Card>
         <Card class="col-span-3">
-          <CardHeader>
-            <CardTitle>Recent Sales</CardTitle>
-            <CardDescription>
-              You made 265 sales this month.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <RecentSales />
-          </CardContent>
+          <RecentSales />
         </Card>
       </div>
     </div>

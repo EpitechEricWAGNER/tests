@@ -1,6 +1,20 @@
-import axios from 'axios';
+import axios, { AxiosResponse }  from 'axios';
 
 const API_URL = 'http://localhost:4000/api';
+
+interface WorkingTimeData {
+	id?: string;
+	start: string;
+	end: string;
+	user: string;
+}
+
+interface WorkingTimeResponse {
+	id: string;
+	start: string;
+	end: string;
+	user: string;
+}
 
 export const workingtimeService = {
 	async getAllWorkingTimes(userID, start, end) {
@@ -25,16 +39,15 @@ export const workingtimeService = {
 		}
 	},
 
-	async createWorkingTime(userID, workingTimeData) {
+	async createWorkingTime(WorkingTimeData: WorkingTimeData): Promise<WorkingTimeResponse> {
 		try {
-			const response = await axios.post(`${API_URL}/workingtime/${userID}`, {
-				start: workingTimeData.start,
-				end: workingTimeData.end,
-				user: workingTimeData.user
+			const response: AxiosResponse<WorkingTimeResponse> = await axios.post(`${API_URL}/workingtime/${WorkingTimeData.user}`, {
+				start: WorkingTimeData.start,
+				end: WorkingTimeData.end,
 			});
 			return response.data;
-		} catch (error) {
-			console.error('Error creating working time:', error.response ? error.response.data : error.message);
+		} catch (error: any) {
+			console.error('Error creating Working time:', error.response ? error.response.data : error.message);
 			throw error;
 		}
 	},

@@ -1,10 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Dashboard from '@/views/Dashboard.vue';
-import Manage from '@/views/Manage.vue';
+import ManageWorkingTime from '@/views/ManageWorkingTime.vue';
+import ManageProfile from '@/views/ManageProfile.vue';
 
 const routes = [
 	{ path: '/', component: Dashboard },
-	{ path: '/manage', component: Manage },
+	{ path: '/profile', component: ManageProfile },
+	{ path: '/manage', component: ManageWorkingTime },
 ];
 
 const router = createRouter({
