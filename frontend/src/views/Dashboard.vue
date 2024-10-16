@@ -16,19 +16,20 @@ import {
 import { computed, onMounted } from "vue";
 import clockService from "@/services/clockService";
 import { useStore } from "vuex";
+import { ref } from "vue";
 
 const store = useStore();
 const user = computed(() => store.getters.user);
+const statusBtn = ref(false);
 
 const getClock = async () => {
     try {
         const id = user.value.data.id;
-        const clocks: { status: boolean; time: Date; user: Number }[] =
-            await clockService.getClocks(id);
-        // console.log("Horloges récupérées:", clocks);
-        const result = clocks;
-        // console.log("Horloge récupérée:", result);
-        return result;
+        const clocks = await clockService.getClocks(id);
+        if (clocks.data.length > 0) {
+            statusBtn.value = clocks.data[clocks.data.length - 1].status;
+        }
+        return clocks;
     } catch (error) {
         console.error("Erreur lors de la récupération de l'horloge:", error);
         return null;
@@ -39,16 +40,19 @@ const createClock = async () => {
     const status = await getClock();
     console.log("Status:", status);
     try {
+        statusBtn.value = !statusBtn.value;
+
         const id = user.value.data.id;
         const clock = await clockService.clock(id);
-        console.log("Horloge créée:", clock);
     } catch (error) {
         console.error("Erreur lors de la création de l'horloge:", error);
     }
 };
 
 onMounted(() => {
-    getClock();
+    if (user.value !== null && user.value !== undefined && user.value !== "") {
+        getClock();
+    }
 });
 </script>
 
@@ -68,7 +72,11 @@ onMounted(() => {
                 <h2 class="text-3xl font-bold tracking-tight">Dashboard</h2>
                 <div class="flex items-center space-x-2">
                     <DateRangePicker />
-                    <Button @click="createClock">Clock</Button>
+                    <Button
+                        :class="statusBtn ? 'bg-green-500' : 'bg-red-500'"
+                        @click="createClock"
+                        >Clock</Button
+                    >
                 </div>
             </div>
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

@@ -45,7 +45,7 @@ const clockManager: ClockManager = {
             const response = await axios.get(`${API_URL}/clocks/${userID}`);
             let clock = response.data.data[response.data.data.length - 1];
             this.clockIn = clock?.status ?? false;
-            return response.data; // Assure-toi que cela retourne bien le bon type
+            return response.data;
         } catch (error: any) {
             console.error(
                 "Error getting clocks:",

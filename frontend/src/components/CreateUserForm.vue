@@ -18,7 +18,7 @@ import userService from "@/services/userService";
 const store = useStore();
 const newUsername = ref<string>("");
 const newEmail = ref<string>("");
-const successMessage = ref<string>(""); // Nouveau ref pour le message de réussite
+const successMessage = ref<string>("");
 
 const createUser = async () => {
     try {
@@ -28,7 +28,7 @@ const createUser = async () => {
         };
         const user: User = await userService.createUser(userData);
         store.commit("setUser", user);
-        successMessage.value = "User created successfully !"; 
+        successMessage.value = "User created successfully !";
         newUsername.value = "";
         newEmail.value = "";
     } catch (error) {
@@ -38,11 +38,9 @@ const createUser = async () => {
 </script>
 
 <template>
-  <div>
+    <div>
         <h3 class="text-lg font-medium">Create User</h3>
-        <p class="text-sm text-muted-foreground">
-            Create a new user.
-        </p>
+        <p class="text-sm text-muted-foreground">Create a new user.</p>
     </div>
     <Separator />
     <form class="space-y-8" @submit.prevent="createUser">
@@ -75,9 +73,7 @@ const createUser = async () => {
                         v-model="newEmail"
                     />
                 </FormControl>
-                <FormDescription>
-                    The user's email address.
-                </FormDescription>
+                <FormDescription> The user's email address. </FormDescription>
                 <FormMessage />
             </FormItem>
         </FormField>
