@@ -12,4 +12,6 @@ COPY . .
 
 RUN mix deps.compile
 
+EXPOSE 4000
+
 CMD mix setup && mix phx.server
