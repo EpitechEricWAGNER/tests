@@ -1,5 +1,9 @@
 FROM elixir:1.17.3
 
+ARG API_URL
+
+ENV API_URL=${API_URL}
+
 RUN mix local.hex --force && mix local.rebar --force
 
 WORKDIR /app/backend
