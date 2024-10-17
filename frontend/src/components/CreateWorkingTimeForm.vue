@@ -252,7 +252,6 @@ const df = new DateFormatter('en-US', {
     </p>
     <div class="flex gap-2 justify-start">
       <Button type="submit">Submit</Button>
-      <Button type="button" variant="destructive">Delete</Button>
     </div>
   </form>
   <div v-if="successMessage" class="mt-4 text-green-600">
