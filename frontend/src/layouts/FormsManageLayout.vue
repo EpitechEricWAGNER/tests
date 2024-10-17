@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import SidebarNav from '@/components/SidebarNav.vue';
+import SidebarManageNav from '@/components/SidebarManageNav.vue'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 </script>
 
@@ -10,17 +11,17 @@ import { Separator } from '@/components/ui/separator'
         Settings
       </h2>
       <p class="text-muted-foreground">
-        Manage your account settings and set e-mail preferences.
+        Manage the Working Times from the employees.
       </p>
     </div>
     <Separator class="my-6" />
     <div class="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
       <aside class="-mx-4 lg:w-1/5">
-        <SidebarNav />
+        <SidebarManageNav />
       </aside>
       <div class="flex-1 lg:max-w-2xl">
         <div class="space-y-6">
-          <slot />
+          <router-view />
         </div>
       </div>
     </div>

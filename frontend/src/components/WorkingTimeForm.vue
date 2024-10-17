@@ -1,251 +1,234 @@
 <script setup lang="ts">
-import { ref, computed, h } from 'vue';
+import { ref, watch } from 'vue';
 import { useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import * as z from 'zod';
-import { Input } from '@/components/ui/input';
+import userService from '@/services/userService';
+import { workingtimeService } from '@/services/workingtimeService';
+import DateRangePicker from "@/components/DateRangePicker.vue";
+import { useStore } from 'vuex';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import userService from '@/services/userService';
-import TimePicker from './TimePicker.vue';
-import { CalendarDate, DateFormatter, getLocalTimeZone, parseDate, today } from '@internationalized/date'
-import { toDate } from 'radix-vue/date'
-import { Calendar as CalendarIcon } from 'lucide-vue-next'
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { toast } from '@/components/ui/toast'
-import { cn } from '@/utils'
-import { workingtimeService } from '@/services/workingtimeService';
+
+const schema = z.object({
+  userId: z.string().nonempty("Please select an employee"),
+});
+
+const { handleSubmit, errors, resetForm, values } = useForm({
+  validationSchema: toTypedSchema(schema),
+});
 
 const users = ref([]);
+const userId = ref('');
+const dateRange = ref({ startDateRange: '', endDateRange: '' });
+const startDateRange = ref<string>("");
+const endDateRange = ref<string>("");
+function handleDateChange(dates: { startDateRange: Date, endDateRange: Date }) {
+  dateRange.value = dates;
+}
+const today = new Date();
+const todayString = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
+startDateRange.value = todayString + " 00:00:00";
+endDateRange.value = todayString + " 23:59:59";
+
 const getUsers = async () => {
   const response = await userService.getAllUsers();
   users.value = response;
 };
 getUsers();
 
-const schema = z.object({
-  userId: z.string().nonempty(),
-  hoursStart: z.number().min(0, 'Invalid hours').max(23, 'Invalid hours'),
-  minutesStart: z.number().min(0, 'Invalid minutes').max(59, 'Invalid minutes'),
-  hoursEnd: z.number().min(0, 'Invalid hours').max(23, 'Invalid hours'),
-  minutesEnd: z.number().min(0, 'Invalid minutes').max(59, 'Invalid minutes'),
-  dateStart: z
-    .string()
-    .refine(v => v, { message: 'A date of birth is required.' }),
-  dateEnd: z
-    .string()
-    .refine(v => v, { message: 'A date of birth is required.' }),
+watch(dateRange, (newDate: any) => {
+  startDateRange.value = newDate.startDateRange + " 00:00:00";
+  endDateRange.value = newDate.endDateRange + " 23:59:59";
 });
 
-const placeholder = ref()
+const workingTimes = ref([]);
 
-const { handleSubmit, setFieldValue, errors, values } = useForm({
-  validationSchema: toTypedSchema(schema),
-  initialValues: {
-    userId: '',
-    hoursStart: 0,
-    minutesStart: 0,
-    hoursEnd: 0,
-    minutesEnd: 0,
-    dateStart: '',
-    dateEnd: '',
-  },
-});
-const valueStart = computed({
-  get: () => values.dateStart ? parseDate(values.dateStart) : undefined,
-  set: val => val,
-})
-
-const valueEnd = computed({
-  get: () => values.dateEnd ? parseDate(values.dateEnd) : undefined,
-  set: val => val,
-})
-
-const submitForm = handleSubmit(async values => {
-
-  const label = document.getElementById('selected-time').getAttribute('data-label');
-  const selectedTimes = document.querySelectorAll('#selected-time');
-  selectedTimes.forEach(time => {
-    const dataLabel = time.getAttribute('data-label');
-    if (dataLabel === "StartTime") {
-      values.hoursStart = parseInt(time.textContent.split(':')[0]);
-      values.minutesStart = parseInt(time.textContent.split(':')[1]);
-    } else if (dataLabel === "EndTime") {
-      values.hoursEnd = parseInt(time.textContent.split(':')[0]);
-      values.minutesEnd = parseInt(time.textContent.split(':')[1]);
-    }
-  });
-  const padZero = (num: number) => num.toString().padStart(2, '0');
-  
-  const formattedDateStart = values.dateStart;
-  const formattedDateEnd = values.dateEnd;
-  
-  const formattedTimeStart = `${padZero(values.hoursStart)}:${padZero(values.minutesStart)}:00`;
-  const formattedTimeEnd = `${padZero(values.hoursEnd)}:${padZero(values.minutesEnd)}:00`;
-
-  let startDateTime = `${formattedDateStart}T${formattedTimeStart}`;
-  let endDateTime = `${formattedDateEnd}T${formattedTimeEnd}`;
-
-  const datas = {
-    user: values.userId,
-    start: startDateTime,
-    end: endDateTime,
-  };
-  try {
-    await workingtimeService.createWorkingTime(datas);
-    alert('Working time created successfully');
-  }
-  catch {
-    alert('Failed to create working time');
+const getWorkingTimes = async () => {
+  if (!userId.value || !startDateRange.value || !endDateRange.value) {
+    console.error("Missing required parameters for request");
     return;
   }
+  try {
+    const response = await workingtimeService.getAllWorkingTimes(userId.value, startDateRange.value, endDateRange.value);
+    workingTimes.value = response.data;
+    workingTimes.value.forEach((workingTime) => {
+      workingTime.start = new Date(workingTime.start);
+      workingTime.end = new Date(workingTime.end);
+      workingTime.date = workingTime.start.toLocaleDateString("fr-FR", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+      workingTime.hours = workingTime.start.toLocaleTimeString(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
+      }) + " to " + workingTime.end.toLocaleTimeString(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    });
+  } catch (error) {
+    console.error("Error fetching working times:", error);
+  }
+};
+
+const submitForm = handleSubmit(() => {
+  if (userId.value && startDateRange.value && endDateRange.value) {
+    getWorkingTimes();
+  } else {
+    console.error("Form is incomplete");
+  }
 });
-const df = new DateFormatter('en-US', {
-  dateStyle: 'long',
-})
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+
+import { Input } from '@/components/ui/input'
+
+
+const updateWorkingTime = async (workingTime: any) => {
+  try {
+    const updatedData = {
+      start: workingTime.start,
+      end: workingTime.end,
+    };
+    console.log("Updating working time:", workingTime);
+    await workingtimeService.updateWorkingTime(workingTime.id, updatedData);
+    console.log("Working time updated successfully");
+    // Optionally, refetch working times or update locally
+    getWorkingTimes();
+  } catch (error) {
+    console.error("Error updating working time:", error);
+  }
+};
+
 
 </script>
 
 <template>
-  <form @submit="submitForm" class="space-y-8">
-    <FormField name="userId" v-slot="{ componentField, errors }">
-      <FormItem>
-        <FormLabel>Select an Employee</FormLabel>
-        <FormControl>
-          <Select v-bind="componentField">
-            <SelectTrigger>
-              <SelectValue placeholder="Select an employee" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Employees</SelectLabel>
-                <template v-for="user in users" :key="user.id">
-                  <SelectItem :value="String(user.id)">{{ user.username }}</SelectItem>
-                </template>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </FormControl>
-        <FormMessage>{{ errors.userId }}</FormMessage>
-      </FormItem>
-    </FormField>
-
-    <Separator />
-
-    <div class="flex space-x-4 items-center">
-      <FormField name="dob">
-        <FormItem class="flex flex-col">
-          <FormLabel>Starting Date</FormLabel>
-          <Popover>
-            <PopoverTrigger as-child>
-              <FormControl>
-                <Button
-                  variant="outline"
-                  :class="cn(
-                    'w-[240px] ps-3 text-start font-normal',
-                    !valueStart && 'text-muted-foreground'
-                  )"
-                >
-                  <span>{{ valueStart ? df.format(toDate(valueStart)) : 'Pick a date' }}</span>
-                  <CalendarIcon class="ms-auto h-4 w-4 opacity-50" />
-                </Button>
-                <input hidden />
-              </FormControl>
-            </PopoverTrigger>
-            <PopoverContent class="w-auto p-0">
-              <Calendar
-                v-model:placeholder="placeholder"
-                v-model="valueStart"
-                calendar-label="Date of birth"
-                initial-focus
-                :min-value="new CalendarDate(1900, 1, 1)"
-                :max-value="today(getLocalTimeZone())"
-                @update:model-value="(v) => {
-                  if (v) {
-                    setFieldValue('dateStart', v.toString());
-                  } else {
-                    setFieldValue('dateStart', undefined);
-                  }
-                }"
-              />
-            </PopoverContent>
-          </Popover>
-          <FormDescription>The starting date is required.</FormDescription>
-          <FormMessage />
+  <form @submit.prevent="submitForm" class="space-y-8">
+    <div class="flex gap-5 items-end">
+      <FormField name="userId" v-slot="{ field, errors }">
+        <FormItem>
+          <FormLabel>Select an Employee</FormLabel>
+          <FormControl>
+            <Select v-model="userId" v-bind="field">
+              <SelectTrigger>
+                <SelectValue placeholder="Select an employee" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Employees</SelectLabel>
+                  <template v-for="user in users" :key="user.id">
+                    <SelectItem :value="String(user.id)">{{ user.username }}</SelectItem>
+                  </template>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </FormControl>
+          <FormMessage>{{ errors.userId }}</FormMessage>
         </FormItem>
       </FormField>
 
-      <TimePicker
-        v-model:hours="values.hoursStart"
-        v-model:minutes="values.minutesStart"
-        label="StartTime"
-      />
+      <DateRangePicker v-model="dateRange" @date-change="handleDateChange"/>
     </div>
-
-    <div class="flex space-x-4 items-center">
-      <FormField name="dob">
-        <FormItem class="flex flex-col">
-          <FormLabel>Ending Date</FormLabel>
-          <Popover>
-            <PopoverTrigger as-child>
-              <FormControl>
-                <Button
-                  variant="outline"
-                  :class="cn(
-                    'w-[240px] ps-3 text-start font-normal',
-                    !valueEnd && 'text-muted-foreground'
-                  )"
-                >
-                  <span>{{ valueEnd ? df.format(toDate(valueEnd)) : 'Pick a date' }}</span>
-                  <CalendarIcon class="ms-auto h-4 w-4 opacity-50" />
-                </Button>
-                <input hidden />
-              </FormControl>
-            </PopoverTrigger>
-            <PopoverContent class="w-auto p-0">
-              <Calendar
-                v-model:placeholder="placeholder"
-                v-model="valueEnd"
-                calendar-label="Date of birth"
-                initial-focus
-                :min-value="new CalendarDate(1900, 1, 1)"
-                :max-value="today(getLocalTimeZone())"
-                @update:model-value="(v) => {
-                  if (v) {
-                    setFieldValue('dateEnd', v.toString());
-                  } else {
-                    setFieldValue('dateEnd', undefined);
-                  }
-                }"
-              />
-            </PopoverContent>
-          </Popover>
-          <FormDescription>The ending date is required.</FormDescription>
-          <FormMessage />
-        </FormItem>
-      </FormField>
-
-      <TimePicker
-        v-model:hours="values.hoursEnd"
-        v-model:minutes="values.minutesEnd"
-        label="EndTime"
-      />
-    </div>
-
-    <p v-if="errors.hoursStart || errors.minutesStart" class="text-red-500">
-      {{ errors.hoursStart || errors.minutesStart }}
-    </p>
-    <p v-if="errors.hoursEnd || errors.minutesEnd" class="text-red-500">
-      {{ errors.hoursEnd || errors.minutesEnd }}
-    </p>
     <div class="flex gap-2 justify-start">
       <Button type="submit">Submit</Button>
-      <Button type="button" variant="destructive">Delete</Button>
     </div>
   </form>
+
+  <Separator />
+
+  <div v-if="workingTimes.length > 0">
+    <Table>
+      <TableCaption>The list of the employee Working Times.</TableCaption>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Date</TableHead>
+          <TableHead>Hours</TableHead>
+          <TableHead class="text-right">
+            Actions
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow v-for="workingTime in workingTimes" :key="workingTime.id">
+          <TableCell>{{ workingTime.date }}</TableCell>
+          <TableCell>{{ workingTime.hours }}</TableCell>
+          <TableCell class="text-right">
+            <Dialog>
+              <DialogTrigger as-child>
+                <Button variant="outline">
+                  Edit
+                </Button>
+              </DialogTrigger>
+              <DialogContent class="sm:max-w-[425px] grid-rows-[auto_minmax(0,1fr)_auto] p-0 max-h-[90dvh]">
+                <DialogHeader class="p-6 pb-0">
+                  <DialogTitle>Edit Working Time</DialogTitle>
+                  <DialogDescription>
+                    Update the working time for the employee.
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <form @submit.prevent="updateWorkingTime(workingTime)" class="grid gap-4 py-4 overflow-y-auto px-6">
+                  <FormField name="start" v-slot="{ field, errors }">
+                    <FormItem>
+                      <FormLabel>Start Time</FormLabel>
+                      <FormControl>
+                        <Input
+                          v-model="workingTime.start"
+                          type="datetime-local"
+                          class="input"
+                          v-bind="field"
+                        />
+                      </FormControl>
+                      <FormMessage>{{ errors.start }}</FormMessage>
+                    </FormItem>
+                  </FormField>
+                  
+                  <FormField name="end" v-slot="{ field, errors }">
+                    <FormItem>
+                      <FormLabel>End Time</FormLabel>
+                      <FormControl>
+                        <Input
+                          v-model="workingTime.end"
+                          type="datetime-local"
+                          class="input"
+                          v-bind="field"
+                        />
+                      </FormControl>
+                      <FormMessage>{{ errors.end }}</FormMessage>
+                    </FormItem>
+                  </FormField>
+                  <DialogFooter class="p-6 pt-0">
+                    <Button type="submit">Save changes</Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  </div>
 </template>
-
-

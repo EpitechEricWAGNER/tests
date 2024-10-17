@@ -5,6 +5,9 @@ import ManageProfile from "@/views/ManageProfile.vue";
 import CreateUserForm from "@/components/CreateUserForm.vue";
 import ProfileForm from "@/components/ProfileForm.vue";
 
+import CreateWorkingTimeForm from "@/components/CreateWorkingTimeForm.vue";
+import WorkingTimeForm from "@/components/WorkingTimeForm.vue";
+
 const routes = [
     { path: "/", component: Dashboard },
 	{
@@ -21,7 +24,21 @@ const routes = [
             },
         ],
     },
-	{ path: '/manage', component: ManageWorkingTime },
+	{ 
+        path: '/manage', 
+        component: ManageWorkingTime,
+        children: [
+            {
+                path: "create",
+                component: CreateWorkingTimeForm,
+            },
+            {
+                path: "",
+                component: WorkingTimeForm,
+            },
+        ],
+    },
+
 ];
 
 const router = createRouter({

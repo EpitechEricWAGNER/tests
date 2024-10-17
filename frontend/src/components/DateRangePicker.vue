@@ -12,12 +12,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { useStore } from 'vuex'
 
 const df = new DateFormatter('fr-FR', {
   dateStyle: 'medium',
 })
+const store = useStore()
 
 const today = new Date()
+store.commit('setDateRange', {
+  startDateRange: today.getFullYear() + "-" + (today.getMonth()+1) + "-" + today.getDate(),
+  endDateRange: today.getFullYear() + "-" + (today.getMonth()+1) + "-" + today.getDate()
+})
 const calendarDate = new CalendarDate(today.getFullYear(), today.getMonth()+1, today.getDate())
 
 const value = ref({

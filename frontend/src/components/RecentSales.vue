@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 import { workingtimeService } from '@/services/workingtimeService';
 const store = useStore();
@@ -22,6 +23,7 @@ const user = computed(() => store.getters.user);
 const userId = ref<string>('');
 const username = ref<string>('');
 const email = ref<string>('');
+userId.value = user ? user.value.data.id : '';
 
 watch(user, (newUser: any) => {
   userId.value = newUser.data.id;
@@ -34,8 +36,10 @@ const dateRange = computed(() => store.getters.dateRange);
 const startDateRange = ref<string>("");
 const endDateRange = ref<string>("");
 
+startDateRange.value = (dateRange.value.startDateRange != null ? dateRange.value.startDateRange + " 00:00:00" : "");
+endDateRange.value = (dateRange.value.endDateRange != null ? dateRange.value.endDateRange + " 23:59:59" : "");
+
 watch(dateRange, (newDate: any) => {
-  console.log(JSON.stringify(newDate));
   startDateRange.value = newDate.startDateRange + " 00:00:00";
   endDateRange.value = newDate.endDateRange + " 23:59:59";
 })
@@ -108,6 +112,8 @@ const getWorkingTimes = async () => {
   }
 };
 
+getWorkingTimes();
+
 watch(
   () => [user.value, dateRange.value],
   () => {
@@ -131,24 +137,26 @@ watch(
       <div v-if="workingTimesRange.length === 0" class="text-center text-sm text-muted-foreground">
         No data found.
       </div>
-      <div class="space-y-8" v-else>
-        <div class="flex items-center" v-for="work in workingTimesRange" :key="work.startingDate">
-          <Avatar class="h-9 w-9">
-            <AvatarImage src="/avatars/01.png" alt="Avatar" />
-            <AvatarFallback>OM</AvatarFallback>
-          </Avatar>
-          <div class="ml-4 space-y-1">
-            <p class="text-sm font-medium leading-none">
-              Date : {{ work.startingDate }}
-            </p>
-            <p class="text-sm text-muted-foreground">
-            </p>
-          </div>
-          <div class="ml-auto font-medium">
-            {{ Math.floor(work.duration / 60) }} hours {{ work.duration % 60 }} minutes
+      <ScrollArea class="h-[400px]" v-else>
+        <div class="space-y-8">
+          <div class="flex items-center" v-for="work in workingTimesRange" :key="work.startingDate">
+            <Avatar class="h-9 w-9">
+              <AvatarImage src="/avatars/01.png" alt="Avatar" />
+              <AvatarFallback>OM</AvatarFallback>
+            </Avatar>
+            <div class="ml-4 space-y-1">
+              <p class="text-sm font-medium leading-none">
+                Date : {{ work.startingDate }}
+              </p>
+              <p class="text-sm text-muted-foreground">
+              </p>
+            </div>
+            <div class="ml-auto font-medium">
+              {{ Math.floor(work.duration / 60) }} hours {{ work.duration % 60 }} minutes
+            </div>
           </div>
         </div>
-      </div>
+      </ScrollArea>
     </div>
   </CardContent>
 </template>
