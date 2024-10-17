@@ -144,7 +144,6 @@ const fetchAllWorkingTimes = async () => {
     }
   }
 
-  console.log(workingTimesChartData.value);
   data.value = workingTimesChartData.value;
 };
 
