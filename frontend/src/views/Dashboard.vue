@@ -8,7 +8,6 @@ import Search from "@/components/Search.vue";
 import UserNav from "@/components/UserNav.vue";
 import { useStore } from 'vuex';
 
-import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
@@ -17,7 +16,6 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { computed, onMounted, watch } from "vue";
-import clockService from "@/services/clockService";
 
 const store = useStore();
 const user = computed(() => store.getters.user);
@@ -32,34 +30,6 @@ watch(user, (newUser: any) => {
   username.value = newUser.data.username;
   email.value = newUser.data.email;
 })
-const getClock = async () => {
-    try {
-        const id = user.value.data.id;
-        const clocks: { status: boolean; time: Date; user: Number }[] =
-            await clockService.getClocks(id);
-        const result = clocks;
-        return result;
-    } catch (error) {
-        console.error("Erreur lors de la récupération de l'horloge:", error);
-        return null;
-    }
-};
-
-const createClock = async () => {
-    const status = await getClock();
-    console.log("Status:", status);
-    try {
-        const id = user.value.data.id;
-        const clock = await clockService.clock(id);
-        console.log("Horloge créée:", clock);
-    } catch (error) {
-        console.error("Erreur lors de la création de l'horloge:", error);
-    }
-};
-
-onMounted(() => {
-    getClock();
-});
 
 import { ref } from 'vue'
 import { workingtimeService } from "@/services/workingtimeService";
@@ -121,6 +91,8 @@ watch(workingTimes, () => {
 
     
 
+import ClockBtn from "@/components/ClockBtn.vue";
+import ClockDaily from "@/components/ClockDaily.vue";
 </script>
 
 <template>
@@ -139,7 +111,7 @@ watch(workingTimes, () => {
                 <h2 class="text-3xl font-bold tracking-tight">Dashboard</h2>
                 <div class="flex items-center space-x-2">
                     <DateRangePicker  @date-change="handleDateChange"/>
-                    <Button @click="createClock">Clock</Button>
+                    <ClockBtn />
                 </div>
             </div>
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -212,7 +184,7 @@ watch(workingTimes, () => {
                         class="flex flex-row items-center justify-between space-y-0 pb-2"
                     >
                         <CardTitle class="text-sm font-medium">
-                            Sales
+                            Time Work
                         </CardTitle>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -229,10 +201,7 @@ watch(workingTimes, () => {
                         </svg>
                     </CardHeader>
                     <CardContent>
-                        <div class="text-2xl font-bold">+12,234</div>
-                        <p class="text-xs text-muted-foreground">
-                            +19% from last month
-                        </p>
+                        <ClockDaily />
                     </CardContent>
                 </Card>
                 <Card>
