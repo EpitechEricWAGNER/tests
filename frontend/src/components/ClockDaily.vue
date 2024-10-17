@@ -6,8 +6,8 @@ import { useStore } from "vuex";
 const store = useStore();
 const user = computed(() => store.getters.user);
 
-let clockIn: any[] = [];
-let clockOut: any[] = [];
+let clockIn: string[] = [];
+let clockOut: string[] = [];
 
 const workTime = reactive({
     hours: 0,
@@ -17,24 +17,23 @@ const workTime = reactive({
 const getClockForToday = async () => {
     try {
         const id = user.value.data.id;
-        const clocks = await clockService.getClocks(id);
-        for (let i = 0; i < clocks.data.length; i++) {
-            let clock = clocks.data[i].time;
-            let date = clock.split("T")[0];
-            let hour = clock.split("T")[1].split(".")[0];
-            const today = new Date().toISOString().split("T")[0];
-            if (date === today) {
-                if (clocks.data[i].status === true) {
-                    clockIn.push(hour);
-                } else {
-                    clockOut.push(hour);
-                }
+        const clockData = {
+            time: new Date().toISOString().split("T")[0],
+            status: false,
+            user: id,
+        };
+        const clockResponse = await clockService.getClocks(clockData);
+        const clockList = clockResponse.data;
+        for (let i = 0; i < clockList.length; i++) {
+            if (clockList[i].status) {
+                clockIn.push(clockList[i].time);
+            } else {
+                clockOut.push(clockList[i].time);
             }
         }
         calculateTimeWork();
     } catch (error) {
         console.error("Error while fetching clock for today:", error);
-        return null;
     }
 };
 
@@ -54,7 +53,7 @@ const calculateTimeWork = () => {
 };
 
 onMounted(() => {
-    if (user.value !== null && user.value !== undefined && user.value !== "") {
+    if (user.value) {
         getClockForToday();
     }
 });

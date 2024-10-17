@@ -1,33 +1,34 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 
 const API_URL = "http://localhost:4000/api";
 
-interface ClockManager {
-    startDateTime: Date | null;
-    clockIn: boolean;
-    clock: (userID: number) => Promise<void>;
-    getClocks: (
-        userID: number
-    ) => Promise<{ status: boolean; time: Date; user: Number }[]>;
+interface ClockData {
+    time: string;
+    status: boolean;
+    user: number;
 }
 
-const clockManager: ClockManager = {
-    startDateTime: null,
-    clockIn: true,
-    async clock(userID: number) {
-        try {
-            this.clockIn = !this.clockIn;
-            const clockData = {
-                time: new Date().toISOString(),
-                status: this.clockIn,
-                user: userID,
-            };
+interface Clock {
+    id: number;
+    time: string;
+    status: boolean;
+}
 
-            const response = await axios.post(
-                `${API_URL}/clocks/${userID}`,
-                clockData
+interface ClockResponse {
+    data: Clock[];
+}
+
+export default {
+    async clock(clockData: ClockData): Promise<ClockResponse> {
+        try {
+            const response: AxiosResponse<ClockResponse> = await axios.post(
+                `${API_URL}/clocks/${clockData.user}`,
+                {
+                    time: clockData.time,
+                    status: clockData.status,
+                    user: clockData.user,
+                }
             );
-            this.startDateTime = this.clockIn ? null : new Date();
             return response.data;
         } catch (error: any) {
             console.error(
@@ -38,13 +39,18 @@ const clockManager: ClockManager = {
         }
     },
 
-    async getClocks(
-        userID: number
-    ): Promise<{ status: boolean; time: Date; user: Number }[]> {
+    async getClocks(clockData: ClockData): Promise<ClockResponse> {
         try {
-            const response = await axios.get(`${API_URL}/clocks/${userID}`);
-            let clock = response.data.data[response.data.data.length - 1];
-            this.clockIn = clock?.status ?? false;
+            const response: AxiosResponse<ClockResponse> = await axios.get(
+                `${API_URL}/clocks/${clockData.user}`,
+                {
+                    params: {
+                        time: clockData.time,
+                        status: clockData.status,
+                        user: clockData.user,
+                    },
+                }
+            );
             return response.data;
         } catch (error: any) {
             console.error(
@@ -55,5 +61,3 @@ const clockManager: ClockManager = {
         }
     },
 };
-
-export default clockManager;
