@@ -13,7 +13,7 @@ const getClock = async () => {
     try {
         const id = user.value.data.id;
         const response = await clockService.getClocks(id);
-        const clocks = response;
+        const clocks = response.data;
         if (clocks.length > 0) {
             statusBtn.value = clocks[clocks.length - 1].status;
         }
