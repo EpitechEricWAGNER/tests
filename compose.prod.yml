@@ -1,0 +1,93 @@
+services:
+  postgres:
+    image: postgres
+    container_name: time_manager_db
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+    ports: 
+      - 5432:5432
+    networks:
+      - back-end
+  
+  adminer:
+    image: adminer
+    container_name: time_manager_adminer
+    restart: always
+    ports:
+      - 2000:8080
+    networks:
+      - back-end
+
+  vue:
+    image: corentinjs/t-poo-700-stg2-frontend:latest
+    container_name: time_manager_frontend
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+      - "traefik.enable=true"
+      - "traefik.http.routers.vue.entrypoints=websecure"
+      - "traefik.http.routers.vue.rule=Host(`time-manager.hubnos.fr`)"
+      - "traefik.http.routers.vue.tls=true"
+      - "traefik.http.routers.vue.tls.certresolver=myresolver"
+      - "traefik.http.routers.vue.tls.domains[0].main=time-manager.hubnos.fr"
+    restart: always
+    depends_on:
+      - postgres
+    networks:
+      - front-end
+      - back-end
+
+  phoenix:
+    image: corentinjs/t-poo-700-stg2-api:latest
+    container_name: time_manager_phoenix
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_DB=${POSTGRES_DB}
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+      - "traefik.enable=true"
+      - "traefik.http.routers.phoenix.entrypoints=websecure"
+      - "traefik.http.routers.phoenix.rule=Host(`time-manager.hubnos.fr`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.phoenix.tls=true"
+      - "traefik.http.routers.phoenix.tls.certresolver=myresolver"
+      - "traefik.http.routers.phoenix.tls.domains[0].main=time-manager.hubnos.fr"
+    restart: always
+    depends_on:
+      - postgres
+    networks:
+      - back-end
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: time_manager_watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_POLL_INTERVAL: 30
+      WATCHTOWER_LABEL_ENABLE: 1
+
+  traefik:
+    image: "traefik:v3.1"
+    container_name: "traefik"
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=corentin.janson@epitech.eu"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
