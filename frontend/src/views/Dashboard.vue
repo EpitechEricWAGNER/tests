@@ -5,24 +5,17 @@ import DateRangePicker from "@/components/DateRangePicker.vue";
 import RecentSales from "@/components/RecentSales.vue";
 import Search from "@/components/Search.vue";
 import UserNav from "@/components/UserNav.vue";
-import { useStore } from 'vuex';
+import { useStore } from "vuex";
 
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { computed, onMounted, watch } from "vue";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { computed, watch } from "vue";
 
-import { ref } from 'vue'
+import { ref } from "vue";
 
-import WorkingTimeCard from '@/components/WorkingTimeCard.vue';
+import WorkingTimeCard from "@/components/WorkingTimeCard.vue";
 
 import ClockBtn from "@/components/ClockBtn.vue";
 import ClockDaily from "@/components/ClockDaily.vue";
-
 
 const store = useStore();
 const user = computed(() => store.getters.user);
@@ -32,12 +25,23 @@ const username = ref<string>("");
 const email = ref<string>("");
 userId.value = user ? user.value.data.id : "";
 
+const selectedDates = ref<{ startDateRange: Date; endDateRange: Date }>({
+    startDateRange: new Date(),
+    endDateRange: new Date(),
+});
+
+function handleDateChange(dates: { startDateRange: Date; endDateRange: Date }) {
+    selectedDates.value = dates;
+
+    store.commit("setDateRange", selectedDates);
+    console.log("Date range changed:", dates);
+}
+
 watch(user, (newUser: any) => {
     userId.value = newUser.data.id;
     username.value = newUser.data.username;
     email.value = newUser.data.email;
 });
-
 </script>
 
 <template>

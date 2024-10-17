@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// ... existing imports
 import { ref, watch } from 'vue';
 import { useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
@@ -7,8 +6,7 @@ import * as z from 'zod';
 import userService from '@/services/userService';
 import { workingtimeService } from '@/services/workingtimeService';
 import DateRangePicker from "@/components/DateRangePicker.vue";
-import { useStore } from 'vuex';
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -17,17 +15,17 @@ const schema = z.object({
   userId: z.string().nonempty("Please select an employee"),
 });
 
-const { handleSubmit, errors, resetForm, values } = useForm({
+const { handleSubmit } = useForm({
   validationSchema: toTypedSchema(schema),
 });
 
-const users = ref([]);
+const users = ref();
 const userId = ref('');
 const dateRange = ref({ startDateRange: '', endDateRange: '' });
 const startDateRange = ref<string>("");
 const endDateRange = ref<string>("");
 
-function handleDateChange(dates: { startDateRange: Date, endDateRange: Date }) {
+function handleDateChange(dates: { startDateRange: string, endDateRange: string }) {
   dateRange.value = dates;
 }
 
@@ -35,6 +33,7 @@ const today = new Date();
 const todayString = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
 startDateRange.value = todayString + " 00:00:00";
 endDateRange.value = todayString + " 23:59:59";
+
 
 const getUsers = async () => {
   const response = await userService.getAllUsers();
@@ -64,7 +63,17 @@ const formatDateTimeLocal = (date: Date): string => {
   return `${year}-${monthString}-${dayString}T${hourString}:${minuteString}`;
 };
 
-const workingTimes = ref([]);
+interface WorkingTime {
+  id: number;
+  start: string | Date;
+  end: string | Date;
+  date?: string;
+  hours?: string;
+  startLocal?: string;
+  endLocal?: string;
+}
+
+const workingTimes = ref<WorkingTime[]>([]);
 
 const getWorkingTimes = async () => {
   if (!userId.value || !startDateRange.value || !endDateRange.value) {

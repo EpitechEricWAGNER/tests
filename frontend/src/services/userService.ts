@@ -97,13 +97,36 @@ export default {
         }
     },
 
-	async getAllUsers(): Promise<UserResponse[]> {
+	async getAllUsers(): Promise<UserResponse> {
 		try {
-            const response: AxiosResponse<UserResponse[]> = await axios.get(`${API_URL}/allusers`);
+            const response: AxiosResponse<UserResponse> = await axios.get(`${API_URL}/allusers`);
             return response.data.data;
         } catch (error: any) {
             console.error('Error getting all users:', error.response? error.response.data : error.message);
             throw error;
         }
 	},
+
+
+    // async getAllUsers(userData: UserData): Promise<UserResponse[]> {
+    //     try {
+    //         const response: AxiosResponse<UserResponse[]> = await axios.get(
+    //             `${API_URL}/allusers`,
+    //             {
+    //                 params: {
+    //                     email: userData.email,
+    //                     username: userData.username,
+    //                     id: userData.id,
+    //                 },
+    //             }
+    //         );
+    //         return response.data;
+    //     } catch (error: any) {
+    //         console.error(
+    //             "Error getting all users:",
+    //             error.response ? error.response.data : error.message
+    //         );
+    //         throw error;
+    //     }
+    // },
 };

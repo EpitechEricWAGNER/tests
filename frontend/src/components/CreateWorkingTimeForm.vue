@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import { ref, computed, h } from 'vue';
+import { ref, computed } from 'vue';
 import { useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import * as z from 'zod';
-import { Input } from '@/components/ui/input';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import userService from '@/services/userService';
 import TimePicker from './TimePicker.vue';
-import { CalendarDate, DateFormatter, getLocalTimeZone, parseDate, today } from '@internationalized/date'
+import { CalendarDate, DateFormatter, parseDate } from '@internationalized/date'
 import { toDate } from 'radix-vue/date'
 import { Calendar as CalendarIcon } from 'lucide-vue-next'
 import { Calendar } from '@/components/ui/calendar'
@@ -18,7 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/utils'
 import { workingtimeService } from '@/services/workingtimeService';
 
-const users = ref([]);
+const users = ref();
 const getUsers = async () => {
   const response = await userService.getAllUsers();
   users.value = response;
@@ -70,11 +69,15 @@ const submitForm = handleSubmit(async values => {
   selectedTimes.forEach(time => {
     const dataLabel = time.getAttribute('data-label');
     if (dataLabel === "StartTime") {
-      values.hoursStart = parseInt(time.textContent.split(':')[0]);
-      values.minutesStart = parseInt(time.textContent.split(':')[1]);
+      if (time.textContent) {
+        values.hoursStart = parseInt(time.textContent.split(':')[0]);
+        values.minutesStart = parseInt(time.textContent.split(':')[1]);
+      }
     } else if (dataLabel === "EndTime") {
-      values.hoursEnd = parseInt(time.textContent.split(':')[0]);
-      values.minutesEnd = parseInt(time.textContent.split(':')[1]);
+      if (time.textContent) {
+        values.hoursEnd = parseInt(time.textContent.split(':')[0]);
+        values.minutesEnd = parseInt(time.textContent.split(':')[1]);
+      }
     }
   });
   const padZero = (num: number) => num.toString().padStart(2, '0');
@@ -157,7 +160,7 @@ const df = new DateFormatter('en-US', {
                   variant="outline"
                   :class="cn(
                     'w-[240px] ps-3 text-start font-normal',
-                    !valueStart && 'text-muted-foreground'
+                    !valueStart ? 'text-muted-foreground' : ''
                   )"
                 >
                   <span>{{ valueStart ? df.format(toDate(valueStart)) : 'Pick a date' }}</span>
@@ -206,7 +209,7 @@ const df = new DateFormatter('en-US', {
                   variant="outline"
                   :class="cn(
                     'w-[240px] ps-3 text-start font-normal',
-                    !valueEnd && 'text-muted-foreground'
+                    !valueEnd ? 'text-muted-foreground' : ''
                   )"
                 >
                   <span>{{ valueEnd ? df.format(toDate(valueEnd)) : 'Pick a date' }}</span>
