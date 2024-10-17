@@ -39,16 +39,21 @@ const currentMonthStartString = currentMonthStart.getFullYear() + "-" + (formatV
 const currentMonthEndString = currentMonthEnd.getFullYear() + "-" + (formatValue(currentMonthEnd.getMonth() + 1)) + "-" + formatValue(currentMonthEnd.getDate()) + " 23:59:59";
 
 const workingTimes = ref([]);
+const isLoading = ref(false);  // Variable pour l'état de chargement
+
 const getWorkingTimes = async () => {
   if (!userId.value || !currentMonthStartString || !currentMonthEndString) {
     console.error("Missing required parameters for request");
     return;
   }
+  isLoading.value = true;  // Démarre le chargement
   try {
     const response = await workingtimeService.getAllWorkingTimes(userId.value, currentMonthStartString, currentMonthEndString);
     workingTimes.value = response.data;
   } catch (error) {
     console.error("Error fetching working times:", error);
+  } finally {
+    isLoading.value = false;  // Fin du chargement
   }
 };
 getWorkingTimes();
@@ -77,7 +82,11 @@ watch(workingTimes, () => {
 
 <template>
     <div class="text-2xl font-bold">
-        <div v-if="totalHours == 0">
+        <div v-if="isLoading" class="flex justify-center items-center">
+            <div class="loader"></div>
+            Loading...
+        </div>
+        <div v-else-if="totalHours == 0">
             No Work
         </div>
         <div v-else>
@@ -85,3 +94,19 @@ watch(workingTimes, () => {
         </div>
     </div>
 </template>
+
+<style scoped>
+.loader {
+  border: 8px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 8px solid #3498db;
+  width: 40px;
+  height: 40px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>

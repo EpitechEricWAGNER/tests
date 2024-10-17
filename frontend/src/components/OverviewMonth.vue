@@ -42,6 +42,7 @@ const fetchWorkingTimesForMonth = async (firstDay: string, lastDay: string) => {
 let workingTimesChartData = ref<WorkingTimeChartData[]>([]);
 const selectedPeriod = ref('month');
 let data = ref();
+const loading = ref(false);
 
 const calculateDuration = (start: Date, end: Date) => {
   const startTime = new Date(start);
@@ -83,6 +84,7 @@ const getWeeksInCurrentMonth = (firstDay: string, lastDay: string) => {
 };
 
 const fetchAllWorkingTimes = async () => {
+  loading.value = true;
   workingTimesChartData.value = [];
   
   const { firstDay, lastDay } = getMonthDays(currentYear, currentMonth);
@@ -145,6 +147,7 @@ const fetchAllWorkingTimes = async () => {
   }
 
   data.value = workingTimesChartData.value;
+  loading.value = false;
 };
 
 watch(selectedPeriod, () => {
@@ -163,6 +166,25 @@ onMounted(() => {
       <button @click="selectedPeriod = 'month'" :class="{ 'bg-blue-500 text-white': selectedPeriod === 'month' }" class="px-4 rounded-md py-2">Mois</button>
       <button @click="selectedPeriod = 'year'" :class="{ 'bg-blue-500 text-white': selectedPeriod === 'year' }" class="px-4 rounded-md py-2">Année</button>
     </div>
-    <BarChart :data="data" :categories="['minutes']" :index="'name'" :rounded-corners="4" />
+    <div v-if="loading" class="flex justify-center items-center">
+      <div class="loader"></div>
+    </div>
+    <BarChart v-else :data="data" :categories="['minutes']" :index="'name'" :rounded-corners="4" />
   </div>
 </template>
+
+<style>
+.loader {
+  border: 8px solid #f3f3f3; 
+  border-radius: 50%;
+  border-top: 8px solid #3498db; 
+  width: 60px;
+  height: 60px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
