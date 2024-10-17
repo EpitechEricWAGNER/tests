@@ -24,23 +24,21 @@ const getUsers = async () => {
 };
 getUsers();
 
+const placeholder = ref()
+
 const schema = z.object({
-  userId: z.string().nonempty(),
+  userId: z.string().nonempty('User is required'),
   hoursStart: z.number().min(0, 'Invalid hours').max(23, 'Invalid hours'),
   minutesStart: z.number().min(0, 'Invalid minutes').max(59, 'Invalid minutes'),
   hoursEnd: z.number().min(0, 'Invalid hours').max(23, 'Invalid hours'),
   minutesEnd: z.number().min(0, 'Invalid minutes').max(59, 'Invalid minutes'),
-  dateStart: z
-    .string()
-    .refine(v => v, { message: 'A date of birth is required.' }),
-  dateEnd: z
-    .string()
-    .refine(v => v, { message: 'A date of birth is required.' }),
+  dateStart: z.string(),
+  dateEnd: z.string(),
 });
 
-const placeholder = ref()
+type FormSchema = z.infer<typeof schema>;
 
-const { handleSubmit, setFieldValue, errors, values } = useForm({
+const { handleSubmit, setFieldValue, errors, values } = useForm<FormSchema>({
   validationSchema: toTypedSchema(schema),
   initialValues: {
     userId: '',
@@ -52,6 +50,7 @@ const { handleSubmit, setFieldValue, errors, values } = useForm({
     dateEnd: '',
   },
 });
+
 const valueStart = computed({
   get: () => values.dateStart ? parseDate(values.dateStart) : undefined,
   set: val => val,
@@ -125,11 +124,11 @@ const df = new DateFormatter('en-US', {
 
 <template>
   <form @submit="submitForm" class="space-y-8">
-    <FormField name="userId" v-slot="{ componentField, errors }">
+    <FormField name="userId" v-slot="{ field, errors }">
       <FormItem>
         <FormLabel>Select an Employee</FormLabel>
         <FormControl>
-          <Select v-bind="componentField">
+          <Select v-bind="field">
             <SelectTrigger>
               <SelectValue placeholder="Select an employee" />
             </SelectTrigger>
@@ -143,9 +142,10 @@ const df = new DateFormatter('en-US', {
             </SelectContent>
           </Select>
         </FormControl>
-        <FormMessage>{{ errors.userId }}</FormMessage>
+        <FormMessage>{{ errors }}</FormMessage>
       </FormItem>
     </FormField>
+
 
     <Separator />
 
@@ -180,7 +180,7 @@ const df = new DateFormatter('en-US', {
                   if (v) {
                     setFieldValue('dateStart', v.toString());
                   } else {
-                    setFieldValue('dateStart', undefined);
+                    setFieldValue('dateStart', '');
                   }
                 }"
               />
@@ -229,7 +229,7 @@ const df = new DateFormatter('en-US', {
                   if (v) {
                     setFieldValue('dateEnd', v.toString());
                   } else {
-                    setFieldValue('dateEnd', undefined);
+                    setFieldValue('dateEnd', '');
                   }
                 }"
               />

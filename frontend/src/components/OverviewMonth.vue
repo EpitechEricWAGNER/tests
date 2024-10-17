@@ -28,15 +28,20 @@ const monthlyData = monthNames.map((month, index) => {
   return { name: month, firstDay, lastDay };
 });
 
+interface WorkingTime {
+  start: string;
+  end: string;
+}
+
 interface WorkingTimeChartData {
   name: string;
-  minutes: any;
-  time: any;
+  minutes: number;
+  time: string;
 }
 
 const fetchWorkingTimesForMonth = async (firstDay: string, lastDay: string) => {
   const response = await workingtimeService.getAllWorkingTimes(userId.value, firstDay, lastDay);
-  return response.data;
+  return response;
 };
 
 let workingTimesChartData = ref<WorkingTimeChartData[]>([]);
@@ -101,7 +106,7 @@ const fetchAllWorkingTimes = async () => {
       day.setDate(day.getDate() + i);
       const dayString = day.toISOString().split('T')[0];
 
-      const dailyDuration = workingTimesMonth.reduce((total, work) => {
+      const dailyDuration = workingTimesMonth.reduce((total: number, work: WorkingTime) => {
         const workDate = new Date(work.start).toISOString().split('T')[0];
         if (workDate === dayString) {
           return total + calculateDuration(new Date(work.start), new Date(work.end));
@@ -120,7 +125,7 @@ const fetchAllWorkingTimes = async () => {
     for (const week of weeks) {
       const workingTimesWeek = await fetchWorkingTimesForMonth(week.start, week.end);
       let total = 0;
-      workingTimesWeek.forEach((work) => {
+      workingTimesWeek.forEach((work: WorkingTime) => {
         const duration = calculateDuration(new Date(work.start), new Date(work.end));
         total += duration;
       });
@@ -134,7 +139,7 @@ const fetchAllWorkingTimes = async () => {
     for (const monthData of monthlyData) {
       const workingTimesMonth = await fetchWorkingTimesForMonth(monthData.firstDay, monthData.lastDay);
       let total = 0;
-      workingTimesMonth.forEach((work) => {
+      workingTimesMonth.forEach((work: WorkingTime) => {
         const duration = calculateDuration(new Date(work.start), new Date(work.end));
         total += duration;
       });

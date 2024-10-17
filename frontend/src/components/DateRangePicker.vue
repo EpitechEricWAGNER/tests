@@ -38,15 +38,16 @@ const value = ref({
 const emit = defineEmits(['date-change'])
 
 watch(value, (newValue) => {
-  // si on clique une fois alors on ne fais rien
-  if (!newValue.start &&!newValue.end) return
-  const formatValue = (val) => val.toString().padStart(2, '0');
+  // If neither start nor end is set, return early
+  if (!newValue.start || !newValue.end) return;
+
+  const formatValue = (val: number) => val.toString().padStart(2, '0');
 
   emit('date-change', {
-    startDateRange: newValue.start.year + "-" + formatValue(newValue.start.month) + "-" + formatValue(newValue.start.day),
-    endDateRange: newValue.end.year + "-" + formatValue(newValue.end.month) + "-" + formatValue(newValue.end.day),
+    startDateRange: `${newValue.start.year}-${formatValue(newValue.start.month)}-${formatValue(newValue.start.day)}`,
+    endDateRange: `${newValue.end.year}-${formatValue(newValue.end.month)}-${formatValue(newValue.end.day)}`,
   });
-})
+});
 
 </script>
 

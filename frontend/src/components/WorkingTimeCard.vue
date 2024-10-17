@@ -67,7 +67,7 @@ const getWorkingTimes = async () => {
             currentMonthStartString,
             currentMonthEndString
         );
-        workingTimes.value = response.data;
+        workingTimes.value = response;
     } catch (error) {
         console.error("Error fetching working times:", error);
     } finally {

@@ -1,22 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, h, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useStore } from 'vuex';
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from '@/components/ui/avatar'
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { ScrollArea } from '@/components/ui/scroll-area'
-
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { workingtimeService } from '@/services/workingtimeService';
+
 const store = useStore();
 const user = computed(() => store.getters.user);
 
@@ -31,12 +20,11 @@ watch(user, (newUser: any) => {
   userId.value = newUser.data.id;
   username.value = newUser.data.username;
   email.value = newUser.data.email;
-})
+});
 
 const dateRange = computed(() => store.getters.dateRange);
-
-const startDateRange = ref<string>("");
-const endDateRange = ref<string>("");
+const startDateRange = ref<string>('');
+const endDateRange = ref<string>('');
 
 startDateRange.value = (dateRange.value.startDateRange != null ? dateRange.value.startDateRange + " 00:00:00" : "");
 endDateRange.value = (dateRange.value.endDateRange != null ? dateRange.value.endDateRange + " 23:59:59" : "");
@@ -44,9 +32,14 @@ endDateRange.value = (dateRange.value.endDateRange != null ? dateRange.value.end
 watch(dateRange, (newDate: any) => {
   startDateRange.value = newDate.startDateRange + " 00:00:00";
   endDateRange.value = newDate.endDateRange + " 23:59:59";
-})
+});
 
-const workingTimes = ref([]);
+interface WorkingTimeResponse {
+    start: string; // or Date if necessary
+    end: string; // or Date if necessary
+}
+
+const workingTimes = ref<WorkingTimeResponse[]>([]);
 
 const calculateDuration = (start: Date, end: Date) => {
   const startTime = new Date(start);
@@ -57,8 +50,7 @@ const calculateDuration = (start: Date, end: Date) => {
 
 const workingTimesRange = computed(() => {
   const timesMap: Record<string, any> = {};
-
-  workingTimes.value.forEach((work: any) => {
+  workingTimes.value.forEach((work: WorkingTimeResponse) => {
     const startingDate = new Date(work.start).toLocaleString('default', {
       month: 'long',
       day: 'numeric',
@@ -72,7 +64,6 @@ const workingTimesRange = computed(() => {
     });
 
     const duration = calculateDuration(new Date(work.start), new Date(work.end));
-
     const key = `${startingDate}-${endingDate}`;
 
     if (timesMap[key]) {
@@ -107,8 +98,8 @@ const getWorkingTimes = async () => {
   }
   loading.value = true; // Set loading to true when starting the request
   try {
-    const response = await workingtimeService.getAllWorkingTimes(userId.value, startDateRange.value, endDateRange.value);
-    workingTimes.value = response.data;
+    const response = await workingtimeService.getAllWorkingTimes(userId.value, startDateRange.value, endDateRange.value) as WorkingTimeResponse[];
+    workingTimes.value = response;
   } catch (error) {
     console.error("Error fetching working times:", error);
   } finally {
@@ -126,7 +117,6 @@ watch(
     }
   }
 );
-
 </script>
 
 <template>
@@ -139,7 +129,6 @@ watch(
     </CardHeader>
     <CardContent>
       <div>
-        
         <div v-if="loading" class="flex justify-center items-center">
           <div class="loader"></div>
         </div>
@@ -157,8 +146,6 @@ watch(
                 <div class="ml-4 space-y-1">
                   <p class="text-sm font-medium leading-none">
                     Date : {{ work.startingDate }}
-                  </p>
-                  <p class="text-sm text-muted-foreground">
                   </p>
                 </div>
                 <div class="ml-auto font-medium">

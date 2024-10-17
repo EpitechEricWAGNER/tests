@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import SidebarManageNav from '@/components/SidebarManageNav.vue'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 </script>
 

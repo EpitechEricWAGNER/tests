@@ -19,11 +19,17 @@ const { handleSubmit } = useForm({
   validationSchema: toTypedSchema(schema),
 });
 
-const users = ref();
-const userId = ref('');
+interface UserResponse {
+  id: string;
+  username: string;
+  email: string;
+}
+
+const users = ref<UserResponse[]>([]); // Use UserResponse type here
+const userId = ref<string>('');
 const dateRange = ref({ startDateRange: '', endDateRange: '' });
-const startDateRange = ref<string>("");
-const endDateRange = ref<string>("");
+const startDateRange = ref<string>('');
+const endDateRange = ref<string>('');
 
 function handleDateChange(dates: { startDateRange: string, endDateRange: string }) {
   dateRange.value = dates;
@@ -34,10 +40,12 @@ const todayString = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + t
 startDateRange.value = todayString + " 00:00:00";
 endDateRange.value = todayString + " 23:59:59";
 
-
 const getUsers = async () => {
   const response = await userService.getAllUsers();
-  users.value = response;
+  users.value = response.map(user => ({
+    ...user,
+    id: String(user.id),
+  }));
 };
 getUsers();
 
@@ -73,6 +81,12 @@ interface WorkingTime {
   endLocal?: string;
 }
 
+interface WorkingTimeResponse {
+  id: string;
+  start: string | Date;
+  end: string | Date;
+}
+
 const workingTimes = ref<WorkingTime[]>([]);
 
 const getWorkingTimes = async () => {
@@ -82,45 +96,55 @@ const getWorkingTimes = async () => {
   }
   try {
     const response = await workingtimeService.getAllWorkingTimes(userId.value, startDateRange.value, endDateRange.value);
-    workingTimes.value = response.data;
+    
+    workingTimes.value = response.map((item: WorkingTimeResponse) => ({
+      id: Number(item.id),
+      start: new Date(item.start),
+      end: new Date(item.end),
+    }));
 
     workingTimes.value.sort((a, b) => {
       const dateA = new Date(a.start).getTime();
       const dateB = new Date(b.start).getTime();
       return dateA - dateB;
     });
-    
+
     workingTimes.value.forEach((workingTime) => {
-      workingTime.start = new Date(workingTime.start);
-      workingTime.end = new Date(workingTime.end);
-      workingTime.date = workingTime.start.toLocaleDateString("fr-FR", {
+      workingTime.date = (new Date(workingTime.start)).toLocaleDateString("fr-FR", {
         day: "numeric",
         month: "long",
         year: "numeric",
       });
-      workingTime.hours = workingTime.start.toLocaleTimeString(undefined, {
+      workingTime.hours = (new Date(workingTime.start)).toLocaleTimeString(undefined, {
         hour: "2-digit",
         minute: "2-digit",
-      }) + " to " + workingTime.end.toLocaleTimeString(undefined, {
+      }) + " to " + (new Date(workingTime.end)).toLocaleTimeString(undefined, {
         hour: "2-digit",
         minute: "2-digit",
       });
 
-      workingTime.startLocal = formatDateTimeLocal(workingTime.start);
-      workingTime.endLocal = formatDateTimeLocal(workingTime.end);
+      workingTime.startLocal = formatDateTimeLocal(workingTime.start as Date);
+      workingTime.endLocal = formatDateTimeLocal(workingTime.end as Date);
     });
   } catch (error) {
     console.error("Error fetching working times:", error);
   }
 };
 
-const updateWorkingTime = async (workingTime: any) => {
+const updateWorkingTime = async (workingTime: WorkingTime) => {
   try {
     const updatedData = {
-      start: workingTime.startLocal,
-      end: workingTime.endLocal,
+      start: workingTime.startLocal ?? '',  // Ensure start is a string
+      end: workingTime.endLocal ?? '',      // Ensure end is a string
+      user: userId.value,                   // Include the user ID here
     };
-    await workingtimeService.updateWorkingTime(workingTime.id, updatedData);
+    
+    if (!updatedData.start || !updatedData.end) {
+      console.error("Start or End time is missing");
+      return;
+    }
+
+    await workingtimeService.updateWorkingTime(String(workingTime.id), updatedData);
     getWorkingTimes();
   } catch (error) {
     console.error("Error updating working time:", error);
@@ -129,7 +153,7 @@ const updateWorkingTime = async (workingTime: any) => {
 
 const deleteWorkingTime = async (id: number) => {
   try {
-    await workingtimeService.deleteWorkingTime(id);
+    await workingtimeService.deleteWorkingTime(String(id));
     getWorkingTimes();
   } catch (error) {
     console.error("Error deleting working time:", error);
@@ -165,6 +189,7 @@ import {
 } from '@/components/ui/table';
 
 import { Input } from '@/components/ui/input';
+
 </script>
 
 <template>
@@ -189,11 +214,11 @@ import { Input } from '@/components/ui/input';
                 </SelectContent>
               </Select>
             </FormControl>
-            <FormMessage>{{ errors.userId }}</FormMessage>
+            <FormMessage>{{ errors }}</FormMessage>
           </FormItem>
         </FormField>
 
-        <DateRangePicker v-model="dateRange" @date-change="handleDateChange"/>
+        <DateRangePicker v-model="dateRange" @date-change="handleDateChange" />
       </div>
       <div class="flex gap-2 justify-start">
         <Button type="submit">Submit</Button>
@@ -242,7 +267,7 @@ import { Input } from '@/components/ui/input';
                               v-bind="field"
                             />
                           </FormControl>
-                          <FormMessage>{{ errors.start }}</FormMessage>
+                          <FormMessage>{{ errors }}</FormMessage>
                         </FormItem>
                       </FormField>
                       
@@ -257,17 +282,16 @@ import { Input } from '@/components/ui/input';
                               v-bind="field"
                             />
                           </FormControl>
-                          <FormMessage>{{ errors.end }}</FormMessage>
+                          <FormMessage>{{ errors }}</FormMessage>
                         </FormItem>
                       </FormField>
-
                       <DialogFooter>
-                        <Button type="submit">Save</Button>
+                        <Button type="submit">Update</Button>
                       </DialogFooter>
                     </form>
                   </DialogContent>
                 </Dialog>
-                
+
                 <Button variant="destructive" @click="deleteWorkingTime(workingTime.id)">Delete</Button>
               </div>
             </TableCell>
