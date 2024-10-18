@@ -25,8 +25,11 @@ services:
       - back-end
 
   vue:
-    image: corentinjs/t-poo-700-stg2-frontend:latest
     container_name: time_manager_frontend
+    build : 
+      context: ./frontend
+      args:
+        - API_URL=${API_URL}
     restart: always
     ports:
       - 5173:8080
@@ -37,24 +40,18 @@ services:
       - back-end
 
   phoenix:
-    image: corentinjs/t-poo-700-stg2-api:latest
+    container_name: time_manager_phoenix
+    build: ./backend
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_DB=${POSTGRES_DB}
-    container_name: time_manager_phoenix
     restart: always
     ports:
       - 4000:4000
     depends_on:
       - postgres
-    volumes:
-      - ./backend/assets/:/app/backend/assets
-      - ./backend/config/:/app/backend/config
-      - ./backend/priv/:/app/backend/priv:cached
-      - ./backend/lib/:/app/backend/lib:cached
-      - ./backend/test/:/app/backend/test
     networks:
       - back-end
 

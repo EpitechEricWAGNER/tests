@@ -1,15 +1,15 @@
-FROM node:22.9-alpine3.19
-
-RUN npm install -g http-server
+FROM node:latest as builder
 
 WORKDIR /app
 
-COPY package*.json ./
-
-RUN npm install
+COPY ./package.json ./package-lock.json ./
+RUN npm ci
 
 COPY . .
 
 RUN npm run build
 
-CMD http-server dist
+FROM nginx:latest as runner
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY ./nginx.conf /etc/nginx/nginx.conf

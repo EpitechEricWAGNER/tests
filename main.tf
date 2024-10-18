@@ -38,15 +38,15 @@ resource "aws_security_group" "ssh" {
   }
 }
 
-resource "aws_security_group" "postgres" {
-  name = "allow-postgres"
+resource "aws_security_group" "https" {
+  name = "allow-https"
 
   ingress {
     cidr_blocks = [
       "0.0.0.0/0"
     ]
-    from_port = 5432
-    to_port   = 5432
+    from_port = 443
+    to_port   = 443
     protocol  = "tcp"
   }
 
@@ -58,15 +58,15 @@ resource "aws_security_group" "postgres" {
   }
 }
 
-resource "aws_security_group" "api" {
-  name = "allow-api"
+resource "aws_security_group" "traefik" {
+  name = "allow-traefik"
 
   ingress {
     cidr_blocks = [
       "0.0.0.0/0"
     ]
-    from_port = 4000
-    to_port   = 4000
+    from_port = 8080
+    to_port   = 8080
     protocol  = "tcp"
   }
 
@@ -78,31 +78,16 @@ resource "aws_security_group" "api" {
   }
 }
 
-resource "aws_security_group" "front" {
-  name = "allow-front"
-
-  ingress {
-    cidr_blocks = [
-      "0.0.0.0/0"
-    ]
-    from_port = 5173
-    to_port   = 5173
-    protocol  = "tcp"
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = -1
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+resource "aws_eip" "ip"{
+  vpc = true
+  instance = aws_instance.timemanager_server.id
 }
 
 resource "aws_instance" "timemanager_server" {
   ami                         = "ami-0a3598a00eff32f66"
   instance_type               = "t2.micro"
   key_name                    = aws_key_pair.timemanager_key.key_name
-  security_groups             = [aws_security_group.ssh.name, aws_security_group.postgres.name, aws_security_group.api.name, aws_security_group.front.name]
+  security_groups             = [aws_security_group.ssh.name, aws_security_group.https.name, aws_security_group.traefik.name]
   associate_public_ip_address = true
 
   tags = {
