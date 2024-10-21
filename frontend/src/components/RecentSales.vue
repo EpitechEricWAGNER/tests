@@ -14,7 +14,7 @@ const username = ref<string>('');
 const email = ref<string>('');
 const loading = ref<boolean>(false);
 
-userId.value = user ? user.value.data.id : '';
+userId.value = user.value ? user.value.data.id : '';
 
 watch(user, (newUser: any) => {
   userId.value = newUser.data.id;

@@ -93,66 +93,70 @@ const fetchAllWorkingTimes = async () => {
   workingTimesChartData.value = [];
   
   const { firstDay, lastDay } = getMonthDays(currentYear, currentMonth);
+  if (userId.value != "") {
 
-  if (selectedPeriod.value === 'week') {
-    const firstDayOfWeek = new Date();
-    firstDayOfWeek.setDate(firstDayOfWeek.getDate() - (firstDayOfWeek.getDay() === 0 ? 6 : firstDayOfWeek.getDay() - 1));
-    const lastDayOfWeek = new Date();
-    lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 6);
-
-    const workingTimesMonth = await fetchWorkingTimesForMonth(firstDayOfWeek.toISOString(), lastDayOfWeek.toISOString());
-    for (let i = 0; i < 7; i++) {
-      const day = new Date(firstDayOfWeek);
-      day.setDate(day.getDate() + i);
-      const dayString = day.toISOString().split('T')[0];
-
-      const dailyDuration = workingTimesMonth.reduce((total: number, work: WorkingTime) => {
-        const workDate = new Date(work.start).toISOString().split('T')[0];
-        if (workDate === dayString) {
-          return total + calculateDuration(new Date(work.start), new Date(work.end));
-        }
-        return total;
-      }, 0);
-
-      workingTimesChartData.value.push({
-        name: dayString,
-        minutes: dailyDuration,
-        time: Math.floor(dailyDuration / 60) + " hours " + dailyDuration % 60 + " minutes",
-      });
+    if (selectedPeriod.value === 'week') {
+      const firstDayOfWeek = new Date();
+      firstDayOfWeek.setDate(firstDayOfWeek.getDate() - (firstDayOfWeek.getDay() === 0 ? 6 : firstDayOfWeek.getDay() - 1));
+      const lastDayOfWeek = new Date();
+      lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 6);
+  
+      const workingTimesMonth = await fetchWorkingTimesForMonth(firstDayOfWeek.toISOString(), lastDayOfWeek.toISOString());
+      for (let i = 0; i < 7; i++) {
+        const day = new Date(firstDayOfWeek);
+        day.setDate(day.getDate() + i);
+        const dayString = day.toISOString().split('T')[0];
+  
+        const dailyDuration = workingTimesMonth.reduce((total: number, work: WorkingTime) => {
+          const workDate = new Date(work.start).toISOString().split('T')[0];
+          if (workDate === dayString) {
+            return total + calculateDuration(new Date(work.start), new Date(work.end));
+          }
+          return total;
+        }, 0);
+  
+        workingTimesChartData.value.push({
+          name: dayString,
+          minutes: dailyDuration,
+          time: Math.floor(dailyDuration / 60) + " hours " + dailyDuration % 60 + " minutes",
+        });
+      }
+    } else if (selectedPeriod.value === 'month') {
+      const weeks = getWeeksInCurrentMonth(firstDay, lastDay);
+      for (const week of weeks) {
+        const workingTimesWeek = await fetchWorkingTimesForMonth(week.start, week.end);
+        let total = 0;
+        workingTimesWeek.forEach((work: WorkingTime) => {
+          const duration = calculateDuration(new Date(work.start), new Date(work.end));
+          total += duration;
+        });
+        workingTimesChartData.value.push({
+          name: `Week from ${new Date(week.start).toLocaleDateString()} to ${new Date(week.end).toLocaleDateString()}`,
+          minutes: Math.floor(total),
+          time: Math.floor(total / 60) + " hours " + total % 60 + " minutes",
+        });
+      }
+    } else if (selectedPeriod.value === 'year') {
+      for (const monthData of monthlyData) {
+        const workingTimesMonth = await fetchWorkingTimesForMonth(monthData.firstDay, monthData.lastDay);
+        let total = 0;
+        workingTimesMonth.forEach((work: WorkingTime) => {
+          const duration = calculateDuration(new Date(work.start), new Date(work.end));
+          total += duration;
+        });
+        workingTimesChartData.value.push({
+          name: monthData.name,
+          minutes: Math.floor(total),
+          time: Math.floor(total / 60) + " hours " + total % 60 + " minutes",
+        });
+      }
     }
-  } else if (selectedPeriod.value === 'month') {
-    const weeks = getWeeksInCurrentMonth(firstDay, lastDay);
-    for (const week of weeks) {
-      const workingTimesWeek = await fetchWorkingTimesForMonth(week.start, week.end);
-      let total = 0;
-      workingTimesWeek.forEach((work: WorkingTime) => {
-        const duration = calculateDuration(new Date(work.start), new Date(work.end));
-        total += duration;
-      });
-      workingTimesChartData.value.push({
-        name: `Week from ${new Date(week.start).toLocaleDateString()} to ${new Date(week.end).toLocaleDateString()}`,
-        minutes: Math.floor(total),
-        time: Math.floor(total / 60) + " hours " + total % 60 + " minutes",
-      });
-    }
-  } else if (selectedPeriod.value === 'year') {
-    for (const monthData of monthlyData) {
-      const workingTimesMonth = await fetchWorkingTimesForMonth(monthData.firstDay, monthData.lastDay);
-      let total = 0;
-      workingTimesMonth.forEach((work: WorkingTime) => {
-        const duration = calculateDuration(new Date(work.start), new Date(work.end));
-        total += duration;
-      });
-      workingTimesChartData.value.push({
-        name: monthData.name,
-        minutes: Math.floor(total),
-        time: Math.floor(total / 60) + " hours " + total % 60 + " minutes",
-      });
-    }
+    
+    data.value = workingTimesChartData.value;
+    loading.value = false;
+  } else {
+    data.value = [];
   }
-
-  data.value = workingTimesChartData.value;
-  loading.value = false;
 };
 
 watch(selectedPeriod, () => {

@@ -23,7 +23,7 @@ const user = computed(() => store.getters.user);
 const userId = ref<string>("");
 const username = ref<string>("");
 const email = ref<string>("");
-userId.value = user ? user.value.data.id : "";
+userId.value = user.value ? user.value.data.id : "";
 
 const selectedDates = ref<{ startDateRange: Date; endDateRange: Date }>({
     startDateRange: new Date(),
