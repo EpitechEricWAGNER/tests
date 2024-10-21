@@ -1,45 +1,84 @@
 <script setup lang="ts">
-import { Calendar as CalendarIcon } from 'lucide-vue-next'
-import type { DateRange } from 'radix-vue'
-import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
-
-import { type Ref, ref } from 'vue'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { RangeCalendar } from '@/components/ui/range-calendar'
+import { Calendar as CalendarIcon } from "lucide-vue-next";
+import type { DateRange } from "radix-vue";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+    CalendarDate,
+    DateFormatter,
+    getLocalTimeZone,
+} from "@internationalized/date";
 
-const df = new DateFormatter('en-US', {
+import { type Ref, ref, watch } from "vue";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { RangeCalendar } from "@/components/ui/range-calendar";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { useStore } from 'vuex'
+
+const df = new DateFormatter('fr-FR', {
   dateStyle: 'medium',
 })
+const store = useStore()
 
-const calendarDate = new CalendarDate(2023, 0, 20)
+const today = new Date()
+store.commit('setDateRange', {
+  startDateRange: today.getFullYear() + "-" + (today.getMonth()+1) + "-" + today.getDate(),
+  endDateRange: today.getFullYear() + "-" + (today.getMonth()+1) + "-" + today.getDate()
+})
+const calendarDate = new CalendarDate(today.getFullYear(), today.getMonth()+1, today.getDate())
 
 const value = ref({
   start: calendarDate,
-  end: calendarDate.add({ days: 20 }),
+  end: calendarDate,
 }) as Ref<DateRange>
+
+const emit = defineEmits(['date-change'])
+
+watch(value, (newValue) => {
+  // If neither start nor end is set, return early
+  if (!newValue.start || !newValue.end) return;
+
+  const formatValue = (val: number) => val.toString().padStart(2, '0');
+
+  emit('date-change', {
+    startDateRange: `${newValue.start.year}-${formatValue(newValue.start.month)}-${formatValue(newValue.start.day)}`,
+    endDateRange: `${newValue.end.year}-${formatValue(newValue.end.month)}-${formatValue(newValue.end.day)}`,
+  });
+});
+
 </script>
 
 <template>
-  <div :class="cn('grid gap-2', $attrs.class ?? '')">
-    <Popover>
-      <PopoverTrigger as-child>
-        <Button id="date" :variant="'outline'" :class="cn(
-          'w-[300px] justify-start text-left font-normal',
-          !value && 'text-muted-foreground',
-        )">
-          <CalendarIcon class="mr-2 h-4 w-4" />
+    <div :class="cn('grid gap-2', $attrs.class ?? '')">
+        <Popover>
+            <PopoverTrigger as-child>
+                <Button
+                    id="date"
+                    :variant="'outline'"
+                    :class="
+                        cn(
+                            'w-[300px] justify-start text-left font-normal',
+                            !value && 'text-muted-foreground'
+                        )
+                    "
+                >
+                    <CalendarIcon class="mr-2 h-4 w-4" />
 
-          <template v-if="value.start">
-            <template v-if="value.end">
-              {{ df.format(value.start.toDate(getLocalTimeZone())) }} - {{
-                df.format(value.end.toDate(getLocalTimeZone())) }}
-            </template>
+                    <template v-if="value.start">
+                        <template v-if="value.end">
+                            {{
+                                df.format(
+                                    value.start.toDate(getLocalTimeZone())
+                                )
+                            }}
+                            -
+                            {{
+                                df.format(value.end.toDate(getLocalTimeZone()))
+                            }}
+                        </template>
 
             <template v-else>
               {{ df.format(value.start.toDate(getLocalTimeZone())) }}
@@ -52,7 +91,7 @@ const value = ref({
       </PopoverTrigger>
       <PopoverContent class="w-auto p-0" align="end">
         <RangeCalendar v-model="value" weekday-format="short" :number-of-months="2" initial-focus
-          :placeholder="value.start" @update:start-value="(startDate) => value.start = startDate" />
+          :placeholder="value.start" @update:start-value="(startDate) => value.start = startDate " />
       </PopoverContent>
     </Popover>
   </div>

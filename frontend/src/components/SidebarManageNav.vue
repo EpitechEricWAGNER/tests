@@ -9,11 +9,11 @@ interface Item {
 const sidebarNavItems: Item[] = [
     {
         title: "Create",
-        href: "/profile/create",
+        href: "/manage/create",
     },
     {
-        title: "Profile",
-        href: "/profile",
+        title: "Manage",
+        href: "/manage",
     },
 ];
 </script>
